@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { handleSuccess } from '../utils';
+import "../index.css";
+import { Link } from 'react-router-dom';
+
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -17,8 +21,12 @@ export default function ForgotPassword() {
       const result = await res.json();
       if (res.ok) {
         toast.success(result.message || 'Reset link sent');
+        const msg = "Please check your email for the reset link.";
         // Optionally redirect to login
-        // navigate('/login');
+        handleSuccess(msg);
+        setTimeout(() => {
+          navigate('/login');
+        }, 500);
       } else {
         toast.error(result.message || 'Failed');
       }
@@ -29,18 +37,28 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div>
-      <h2>Forgot password</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          value={email}
-          placeholder="Enter your email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <button type="submit">Send reset link</button>
-      </form>
+    <div className="forgot-container">
+      <div className="forgot-box">
+        <h2>🔑 Forgot Password</h2>
+        <p className="subtitle">
+          Enter your email to receive a reset link
+        </p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            value={email}
+            placeholder="Enter your email"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <button type="submit">Send reset link</button>
+        </form>
+        <div className="redirect-link" style={{ marginTop: '15px' }}>
+            <center>
+                Back to Login <Link to="/login">Login</Link>
+              </center>
+        </div>
+      </div>
     </div>
   );
 }

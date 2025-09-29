@@ -37,8 +37,8 @@ function Signup() {
                 },
                 body: JSON.stringify(signupInfo)
             });
-            console.log('status:', response.status);   // 400 chẳng hạn
-console.log('statusText:', response.statusText);
+            console.log('status:', response.status);  
+            console.log('statusText:', response.statusText);
             console.log(signupInfo);
             const result = await response.json();
             const {success, message, error} = result;
