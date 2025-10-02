@@ -36,14 +36,17 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
+
 .btn--primary {
   background: var(--primary);
   color: #fff;
 }
+
 .btn--sm {
   padding: 10px 14px;
   border-radius: 14px;
 }
+
 .btn:hover {
   opacity: 0.9;
 }
@@ -55,12 +58,14 @@ body {
   top: 0;
   z-index: 30;
 }
+
 .nav__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
 }
+
 .nav__menu {
   display: flex;
   gap: 18px;
@@ -68,15 +73,18 @@ body {
   font-weight: 500;
   letter-spacing: 0.02em;
 }
+
 .nav__menu a {
   text-decoration: none;
   color: #000;
 }
+
 .nav__logo {
   font-weight: 800;
   font-size: 1.5rem;
   letter-spacing: 0.22em;
 }
+
 .nav__right {
   display: flex;
   align-items: center;
@@ -103,6 +111,7 @@ body {
   padding: 8px 10px;
   background: #fff;
 }
+
 .nav__search {
   border: none;
   outline: none;
@@ -113,12 +122,14 @@ body {
 .filterwrap {
   position: relative;
 }
+
 .filterbar {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   z-index: 50;
 }
+
 .filter-panel {
   width: 180px;
   border: 1px solid #e5e7eb;
@@ -130,17 +141,20 @@ body {
   flex-direction: column;
   gap: 10px;
 }
+
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .filter-gender {
   font-weight: 700;
   font-size: 16px;
   margin-top: 4px;
   cursor: pointer;
 }
+
 .cat-link {
   width: 100%;
   text-align: left;
@@ -151,6 +165,7 @@ body {
   background: #fff;
   cursor: pointer;
 }
+
 .cat-link:hover {
   background: #000;
   color: #fff;
@@ -163,12 +178,14 @@ body {
   display: flex;
   justify-content: center;
 }
+
 .mySwiper {
   width: 100%;
   max-width: 1000px;
   height: 380px;
   position: relative;
 }
+
 .mySwiper img {
   width: 100%;
   height: 100%;
@@ -177,6 +194,7 @@ body {
   background: #f9f9f9;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
+
 .swiper-button-next,
 .swiper-button-prev {
   color: #fff;
@@ -185,6 +203,7 @@ body {
   background: none;
   box-shadow: none;
 }
+
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 20px;
@@ -196,6 +215,7 @@ body {
   font-weight: 700;
   margin: 0;
 }
+
 .featured__subtitle {
   text-align: center;
   color: #7b7b7b;
@@ -205,6 +225,7 @@ body {
 .shop {
   padding: 28px 0 44px;
 }
+
 .shop__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -220,6 +241,7 @@ body {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease;
 }
+
 .card:hover {
   transform: translateY(-5px);
 }
@@ -233,6 +255,7 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 .card__media img {
   width: 100%;
   height: 100%;
@@ -249,6 +272,7 @@ body {
   justify-content: center;
   gap: 8px;
 }
+
 .circle-btn {
   width: 34px;
   height: 34px;
@@ -261,10 +285,12 @@ body {
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
+
 .circle-btn:hover {
   background: #111;
   color: #fff;
 }
+
 .buy-btn {
   display: inline-flex;
   align-items: center;
@@ -277,6 +303,7 @@ body {
   font-size: 13px;
   cursor: pointer;
 }
+
 .buy-btn:hover {
   opacity: 0.9;
 }
@@ -285,10 +312,12 @@ body {
   padding: 12px;
   text-align: center;
 }
+
 .card__title {
   font-weight: 600;
   margin: 2px 0 0;
 }
+
 .price {
   font-weight: 700;
   margin: 0;
@@ -299,26 +328,31 @@ body {
   border-top: 1px solid #eee;
   margin-top: 10px;
 }
+
 .footer__grid {
   display: grid;
   gap: 24px;
   padding: 28px 0;
   grid-template-columns: repeat(4, 1fr);
 }
+
 .footer__col {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .footer__title {
   font-weight: 700;
   margin: 0 0 4px;
 }
+
 .footer__muted {
   color: #6b7280;
   margin: 0;
   font-size: 0.92rem;
 }
+
 .footer__list {
   list-style: none;
   padding: 0;
@@ -327,24 +361,29 @@ body {
   flex-direction: column;
   gap: 8px;
 }
+
 .footer__list a {
   text-decoration: none;
   color: inherit;
 }
+
 .footer__list a:hover {
   color: #000;
 }
+
 .footer__subscribe {
   display: flex;
   gap: 8px;
   margin-top: 6px;
 }
+
 .footer__input {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 }
+
 .footer__payments {
   display: flex;
   gap: 10px;
@@ -352,16 +391,19 @@ body {
   font-size: 0.8rem;
   color: #6b7280;
 }
+
 .footer__bottom {
   border-top: 1px solid #e5e7eb;
   background: #f5f5f5;
 }
+
 .footer__bottomInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 0;
 }
+
 .footer__brand {
   font-weight: 800;
   letter-spacing: 0.22em;
@@ -371,14 +413,17 @@ body {
   .shop__grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .footer__grid {
     grid-template-columns: 1fr 1fr;
   }
 }
+
 @media (max-width: 640px) {
   .shop__grid {
     grid-template-columns: 1fr;
   }
+
   .footer__grid {
     grid-template-columns: 1fr;
   }
@@ -396,6 +441,7 @@ body {
 .select {
   position: relative;
 }
+
 .select__btn {
   display: flex;
   align-items: center;
@@ -407,9 +453,11 @@ body {
   cursor: pointer;
   font-weight: 600;
 }
+
 .select__btn:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
+
 .select__menu {
   position: absolute;
   top: 100%;
@@ -423,6 +471,7 @@ body {
   padding: 6px;
   z-index: 20;
 }
+
 .select__item {
   width: 100%;
   text-align: left;
@@ -432,12 +481,15 @@ body {
   border: none;
   cursor: pointer;
 }
+
 .select__item:hover {
   background: #f5f5f5;
 }
+
 .chev {
   transition: transform 0.15s;
 }
+
 .chev.up {
   transform: rotate(180deg);
 }
@@ -447,6 +499,7 @@ body {
   gap: 8px;
   flex-wrap: wrap;
 }
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -459,6 +512,7 @@ body {
   user-select: none;
   font-size: 0.9rem;
 }
+
 .chip--on {
   background: #111;
   color: #fff;
@@ -472,6 +526,7 @@ body {
   justify-content: center;
   align-items: center;
 }
+
 .pager__btn {
   width: 44px;
   height: 38px;
@@ -481,12 +536,89 @@ body {
   font-weight: 700;
   cursor: pointer;
 }
+
 .pager__btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
 .pager__dots {
   font-weight: 700;
   letter-spacing: 6px;
   color: var(--muted);
+}
+
+.card .card__media {
+
+  aspect-ratio: 1 / 1;
+  height: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.card .card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 0;
+
+  opacity: 0;
+
+  transition: opacity .2s ease;
+  will-change: opacity;
+  /* hint hiệu năng */
+  backface-visibility: hidden;
+}
+
+/* Khi onLoad trong React thêm class "loaded" → fade-in mượt, hết chớp */
+.card .card__media img.loaded {
+  opacity: 1;
+}
+
+/* Giữ chỗ cho text để tránh “nhảy chữ” khi font/ảnh cập nhật */
+.card .price {
+  min-height: 1em;
+}
+
+.card .card__title {
+  min-height: 1.25em;
+}
+
+/* Skeleton nhìn gọn hơn (nếu bạn đang dùng) */
+.card.skeleton .card__media {
+  background: linear-gradient(90deg, #f3f3f3 0%, #f8f8f8 40%, #f3f3f3 80%);
+  background-size: 200% 100%;
+  animation: sk-shine 1.2s linear infinite;
+}
+
+.card.skeleton .price,
+.card.skeleton .card__title {
+  background: #f2f2f2;
+  border-radius: 6px;
+}
+
+.card.skeleton .price {
+  height: 14px;
+  margin: 8px auto;
+  width: 60%;
+}
+
+.card.skeleton .card__title {
+  height: 16px;
+  margin: 6px auto 0;
+  width: 80%;
+}
+
+@keyframes sk-shine {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Optional: giảm chuyển động nếu người dùng chọn “reduce motion” */
+@media (prefers-reduced-motion: reduce) {
+  .card .card__media img {
+    transition: none;
+  }
 }
