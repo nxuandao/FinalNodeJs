@@ -1,6 +1,7 @@
 import { Navigate, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./App.css";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/login";
 import Signup from "./pages/signup";
@@ -9,6 +10,7 @@ import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import Products from "./pages/products";
 import Cart from "./pages/cart";
+import AdminPage from "./pages/homeAdmin";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -41,7 +43,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/homeAdmin" element={ <ProtectedRoute role="admin"> <AdminPage /> </ProtectedRoute> } />
       </Routes>
+      
     </div>
   );
 }

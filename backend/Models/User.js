@@ -1,11 +1,18 @@
 const mongoose = require('mongoose');
 
+// const addressSchema = new mongoose.Schema({
+//   street: { type: String, required: false },
+//   city: { type: String, required: false },
+//   houseNumber: { type: String, required: false },
+//   ward: { type: String, required: false }
+// }, { _id: false }); 
 const addressSchema = new mongoose.Schema({
-  street: { type: String, required: false },
-  city: { type: String, required: false },
-  houseNumber: { type: String, required: false },
-  ward: { type: String, required: false }
-}, { _id: false }); 
+  street: { type: String, default: "" },
+  city: { type: String, default: "" },
+  houseNumber: { type: String, default: "" },
+  ward: { type: String, default: "" }
+}, { _id: false });
+
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -28,6 +35,16 @@ const UserSchema = new mongoose.Schema({
   address: {
     type: addressSchema,
     default: {}
+  },
+  role: {  
+    type: String,
+    enum: ["user", "admin", "manager"], 
+    default: "user"
+  },
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active"
   },
   isVerified: {                
     type: Boolean,
