@@ -1,12 +1,14 @@
+
 const bcrypt = require('bcrypt');
 const UserModel = require('../Models/User');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const { sendEmail } = require('../utils/email');
+
+const { sendVerificationEmail, sendResetPasswordEmail, sendEmail } = require('../utils/email'); const crypto = require('crypto');
+
 // Signup
 const signup = async (req, res) => {
   try {
-    const { name, email, phone, password} = req.body;
+    const { name, email, phone, password } = req.body;
 
     // Kiểm tra user tồn tại chưa
     const existingUser = await UserModel.findOne({ email });
@@ -95,17 +97,17 @@ const login = async (req, res) => {
     const userAgent = req.get("User-Agent");
 
     const newLog = {
-  action: "Login",
-  ip: req.headers["x-forwarded-for"]?.split(",")[0] || req.ip || "guest",
-  userAgent: req.get("User-Agent") || "guest",
-  time: new Date()
-};
+      action: "Login",
+      ip: req.headers["x-forwarded-for"]?.split(",")[0] || req.ip || "guest",
+      userAgent: req.get("User-Agent") || "guest",
+      time: new Date()
+    };
 
     await UserModel.findByIdAndUpdate(existingUser._id, {
       $push: {
         activity_log: {
           $each: [newLog],
-          $slice: -50 
+          $slice: -50
         }
       }
     });
@@ -115,17 +117,17 @@ const login = async (req, res) => {
       message: "Login successful",
       success: true,
       jwtToken,
-        user: {
-            id: existingUser._id,
-            name: existingUser.name,
-            email: existingUser.email,
-            phone: existingUser.phone,
-            address: existingUser.address,
-            activity_log: existingUser.activity_log,
-            createdAt: existingUser.createdAt,
-            updatedAt: existingUser.updatedAt
-            
-        }
+      user: {
+        id: existingUser._id,
+        name: existingUser.name,
+        email: existingUser.email,
+        phone: existingUser.phone,
+        address: existingUser.address,
+        activity_log: existingUser.activity_log,
+        createdAt: existingUser.createdAt,
+        updatedAt: existingUser.updatedAt
+
+      }
     });
   } catch (err) {
     console.error(err);
@@ -173,7 +175,7 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
-    const { token } = req.params; 
+    const { token } = req.params;
     const user = await UserModel.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() }
