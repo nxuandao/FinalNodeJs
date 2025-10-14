@@ -1,83 +1,92 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "../App.css";
 
-export default function Cart({ isLoggedIn }) {
-  const navigate = useNavigate();
-  const [cart, setCart] = useState([
-    { id: 1, name: "Áo Thun Nam", price: 25, qty: 2, img: "/shop5.jpg" },
-    { id: 2, name: "Váy Nữ", price: 55, qty: 1, img: "/shop6.jpg" },
-  ]);
+export default function Cart() {
+  const [cartItems, setCartItems] = useState([]);
 
-  const updateQty = (id, qty) => {
-    if (qty < 1) return;
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, qty } : item))
-    );
-  };
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartItems(savedCart);
+  }, []);
+
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   const removeItem = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    const newCart = cartItems.filter((item) => item.id !== id);
+    setCartItems(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-  const checkout = () => {
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
+  const clearCart = () => {
+    if (window.confirm("Bạn có chắc muốn xóa toàn bộ giỏ hàng?")) {
+      setCartItems([]);
+      localStorage.removeItem("cart");
     }
-    navigate("/checkout");
   };
 
   return (
-    <div className="cart-page">
-      <Header isLoggedIn={isLoggedIn} />
-
-      <section className="cart container">
-        <h2 className="featured__title">Your Cart</h2>
-        {cart.length === 0 ? (
-          <p>Giỏ hàng trống.</p>
-        ) : (
-          <div className="cart__table">
-            {cart.map((item) => (
-              <div key={item.id} className="cart__row">
-                <div className="cart__img">
-                  <img src={item.img} alt={item.name} />
-                </div>
-                <div className="cart__info">
-                  <div className="cart__name">{item.name}</div>
-                  <div className="cart__price">${item.price.toFixed(2)}</div>
-                  <div className="cart__qty">
-                    <button onClick={() => updateQty(item.id, item.qty - 1)}>
-                      -
+    <div className="cart container">
+      <h1>🛒 Giỏ hàng của bạn</h1>
+      {cartItems.length === 0 ? (
+        <div className="empty-cart">
+          <p>Giỏ hàng đang trống.</p>
+          <Link className="btn" to="/store">
+            Tiếp tục mua sắm
+          </Link>
+        </div>
+      ) : (
+        <>
+          <table className="cart-table">
+            <thead>
+              <tr>
+                <th>Ảnh</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="cart-thumb"
+                    />
+                  </td>
+                  <td>{item.name}</td>
+                  <td>${item.price}</td>
+                  <td>{item.qty}</td>
+                  <td>${item.price * item.qty}</td>
+                  <td>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      ✕
                     </button>
-                    <span>{item.qty}</span>
-                    <button onClick={() => updateQty(item.id, item.qty + 1)}>
-                      +
-                    </button>
-                  </div>
-                  <button
-                    className="btn btn--sm"
-                    onClick={() => removeItem(item.id)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            <div className="cart__total">
-              <h3>Total: ${total.toFixed(2)}</h3>
-              <button className="btn btn--primary" onClick={checkout}>
-                Checkout
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="cart-summary">
+            <p>
+              <strong>Tổng cộng:</strong> ${total}
+            </p>
+            <div className="cart-actions">
+              <button className="btn clear" onClick={clearCart}>
+                Xóa toàn bộ
               </button>
+              <button className="btn checkout">Thanh toán</button>
             </div>
           </div>
-        )}
-      </section>
-
-      <Footer />
+        </>
+      )}
     </div>
   );
 }

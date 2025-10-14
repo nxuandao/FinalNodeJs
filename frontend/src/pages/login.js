@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { handleError, handleSuccess } from "../utils";
 
 function Login() {
-  const [loginInfo, setLoginInfo] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [loginInfo, setLoginInfo] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/home";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,9 +17,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { email, password } = loginInfo;
-    if (!email || !password) {
-      return handleError("All fields are required");
-    }
+    if (!email || !password) return handleError("All fields are required");
 
     try {
       const url = "http://localhost:8080/auth/login";
@@ -33,21 +28,15 @@ function Login() {
       });
 
       const result = await response.json();
-      console.log("Login response:", result);
-
-      // Lấy key từ API
-      const { success, message, error, jwtToken, user, name } = result;
+      const { success, message, error, jwtToken, user } = result;
 
       if (success) {
         handleSuccess(message);
-        //Cái này lưu token vào localStorage
         localStorage.setItem("token", jwtToken);
-        //Sau đó lưu id và name
         localStorage.setItem("loggedInUser", user?.name || "Guest");
         localStorage.setItem("loggedInUserName", user?.name || "Guest");
-        setTimeout(() => {
-          navigate("/home");
-        }, 1000);
+        window.dispatchEvent(new Event("auth"));
+        navigate(from, { replace: true });
       } else if (error) {
         return handleError(
           error?.details?.[0]?.message ||
@@ -61,7 +50,6 @@ function Login() {
         );
       }
     } catch (err) {
-      console.error(err);
       return handleError(
         err.message || "Something went wrong. Please try again later."
       );

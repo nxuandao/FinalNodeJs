@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import PaymentIcon from "@mui/icons-material/Payment";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { fetchProducts } from "../services/products";
 
 export default function Products({ isLoggedIn }) {
@@ -51,13 +49,10 @@ export default function Products({ isLoggedIn }) {
 
   return (
     <div className="products">
-      <Header isLoggedIn={isLoggedIn} />
-
       <section className="shop">
         <div className="container">
-          <h2 className="featured__title">Products</h2>
+          <h2 className="featured__title">Sản phẩm</h2>
 
-          {/* Toolbar */}
           <div className="toolbar">
             <div className="select">
               <button
@@ -65,10 +60,10 @@ export default function Products({ isLoggedIn }) {
                 onClick={() => setOpenSort((o) => !o)}
               >
                 {sort === "all"
-                  ? "All products"
+                  ? "Tất cả sản phẩm"
                   : sort === "low"
-                  ? "Giá: Thấp đến Cao"
-                  : "Giá: Cao đến Thấp"}
+                  ? "Giá từ thấp đến cao"
+                  : "Giá từ cao đến thấp"}
                 <span className={`chev ${openSort ? "up" : ""}`}>▼</span>
               </button>
               {openSort && (
@@ -80,7 +75,7 @@ export default function Products({ isLoggedIn }) {
                       setOpenSort(false);
                     }}
                   >
-                    All products
+                    Tất cả sản phẩm
                   </button>
                   <button
                     className="select__item"
@@ -89,7 +84,7 @@ export default function Products({ isLoggedIn }) {
                       setOpenSort(false);
                     }}
                   >
-                    Giá: Thấp đến Cao
+                    Giá từ thấp đến cao
                   </button>
                   <button
                     className="select__item"
@@ -98,14 +93,13 @@ export default function Products({ isLoggedIn }) {
                       setOpenSort(false);
                     }}
                   >
-                    Giá: Cao đến Thấp
+                    Giá từ cao đến thấp
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Grid */}
           <div className="shop__grid">
             {loading
               ? "Loading..."
@@ -134,7 +128,6 @@ export default function Products({ isLoggedIn }) {
                 ))}
           </div>
 
-          {/* Pagination */}
           <div className="pager">
             <button
               className="pager__btn"
@@ -150,8 +143,6 @@ export default function Products({ isLoggedIn }) {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

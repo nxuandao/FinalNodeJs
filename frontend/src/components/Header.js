@@ -5,6 +5,11 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useRef, useState, useEffect } from "react";
 
+const FILTERS = {
+  nam: ["Áo sơmi", "Áo thun", "Áo khoác", "Quần dài", "Quần short"],
+  nu: ["Áo sơmi", "Áo thun", "Áo khoác", "Quần dài", "Váy", "Đầm"],
+};
+
 export default function Header({ isLoggedIn }) {
   const [search, setSearch] = useState("");
   const [showFilter, setShowFilter] = useState(false);
@@ -13,8 +18,9 @@ export default function Header({ isLoggedIn }) {
 
   useEffect(() => {
     const h = (e) => {
-      if (filterRef.current && !filterRef.current.contains(e.target))
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
         setShowFilter(false);
+      }
     };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
@@ -27,6 +33,12 @@ export default function Header({ isLoggedIn }) {
     }
   };
 
+  const pick = (gender, type) => {
+    const qs = new URLSearchParams({ gender, type }).toString();
+    navigate(`/home?${qs}`);
+    setShowFilter(false);
+  };
+
   return (
     <header className="site-header">
       <div className="container nav__inner">
@@ -37,7 +49,9 @@ export default function Header({ isLoggedIn }) {
           <Link to="/blog">BLOG</Link>
           <Link to="/contact">CONTACT</Link>
         </nav>
+
         <div className="nav__logo">OurShop</div>
+
         <div className="nav__right">
           <div className="nav__searchwrap">
             <SearchIcon fontSize="small" />
@@ -49,28 +63,60 @@ export default function Header({ isLoggedIn }) {
               onKeyDown={onSearchSubmit}
             />
           </div>
+
           <div className="filterwrap" ref={filterRef}>
             <button
               className="icon-btn"
               onClick={() => setShowFilter((v) => !v)}
+              aria-expanded={showFilter}
+              aria-haspopup="menu"
             >
               <FilterListIcon />
             </button>
+
             {showFilter && (
-              <div className="filterbar">
-                <div className="filter-panel">
-                  <p>Bộ lọc sản phẩm (chưa hoàn thiện)</p>
+              <div className="filter-dropdown" role="menu">
+                <div className="filter-group">
+                  <div className="filter-title">Nam</div>
+                  {FILTERS.nam.map((t) => (
+                    <button
+                      key={`nam-${t}`}
+                      className="filter-item"
+                      role="menuitem"
+                      onClick={() => pick("nam", t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="filter-sep" />
+
+                <div className="filter-group">
+                  <div className="filter-title">Nữ</div>
+                  {FILTERS.nu.map((t) => (
+                    <button
+                      key={`nu-${t}`}
+                      className="filter-item"
+                      role="menuitem"
+                      onClick={() => pick("nu", t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
           </div>
+
           {isLoggedIn && (
             <button className="icon-btn" onClick={() => navigate("/cart")}>
               <ShoppingCartIcon />
             </button>
           )}
+
           {isLoggedIn ? (
-            <button className="icon-btn">
+            <button className="icon-btn" onClick={() => navigate("/profile")}>
               <AccountCircleIcon />
             </button>
           ) : (
