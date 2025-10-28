@@ -4,11 +4,17 @@ const ensureAuthenticated = (req, res, next) => {
     if (!auth) {
         return res.status(403).json({ message: "Unauthorized, JWT token wrong or expired" });
     }
-    try{
+    try {
+        let token = auth;
+        if (typeof auth === 'string' && auth.toLowerCase().startsWith('bearer ')) {
+            token = auth.slice(7).trim();
+        }
         const decoded = jwt.verify(auth, process.env.JWT_SECRET);
         req.user = decoded;
-        next(); 
-    }catch(err){
+
+        req.authToken = token;       // (tuỳ chọn) lưu lại token nếu cần dùng tiếp
+        return next();
+    } catch (err) {
         return res.status(403).json({ message: "Unauthorized, JWT token wrong or expired" });
     }
 

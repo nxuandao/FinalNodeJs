@@ -1,6 +1,12 @@
 // Models/Product.js
 const mongoose = require('mongoose');
-
+const ReviewSchema = new mongoose.Schema({
+    userId: String,
+    userName: String,
+    rating: { type: Number, min: 1, max: 5, required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+}, { _id: false });
 const ProductSchema = new mongoose.Schema(
     {
         name: { type: String, required: true, trim: true, index: true },
@@ -10,6 +16,7 @@ const ProductSchema = new mongoose.Schema(
         // Lưu 1 màu duy nhất hoặc nhiều màu đều được:
         color: { type: String, trim: true, index: true },
         colors: [{ type: String, trim: true, index: true }],
+        sizes: [{ type: String, trim: true }],
 
         // Đơn giản dùng chuỗi category; nếu bạn có bảng riêng thì đổi sang ObjectId + ref
         category: { type: String, trim: true, index: true },
@@ -19,7 +26,8 @@ const ProductSchema = new mongoose.Schema(
         images: [{ type: String }],
 
         isActive: { type: Boolean, default: true },
-        stock: { type: Number, default: 0 }
+        stock: { type: Number, default: 0 },
+        reviews: { type: [ReviewSchema], default: [] }
     },
     { timestamps: true }
 );

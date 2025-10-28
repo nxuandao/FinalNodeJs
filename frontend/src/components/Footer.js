@@ -9,7 +9,7 @@ export default function Footer() {
           <p className="footer__muted">
             Find a location nearest you. See Our Stores
           </p>
-          <p className="footer__muted">+91 (03)5 4569 1587</p>
+          <p className="footer__muted">0123 456 789</p>
           <p className="footer__muted">ourshop@gmail.com</p>
         </div>
         <div className="footer__col">
