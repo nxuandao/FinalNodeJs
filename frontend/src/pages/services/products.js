@@ -1,4 +1,3 @@
-// frontend/src/services/products.js
 export async function fetchProducts({ q, gender, category, page, limit = 12 }) {
   const startIndex = (page - 1) * limit;
   const items = Array.from({ length: limit }).map((_, i) => {

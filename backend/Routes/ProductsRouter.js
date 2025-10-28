@@ -1,10 +1,10 @@
 // Routes/ProductsRouter.js
 const router = require('express').Router();
 const { ensureAuthenticated } = require('../Middlewares/Auth.js');
-const { listProducts } = require('../Controllers/ProductsController');
+const { listProducts, getProductById, addReview } = require('../Controllers/ProductsController');
 
 // ✅ Public: tìm kiếm sản phẩm – ai cũng truy cập được
-router.get('/', listProducts);
+
 
 // (tuỳ chọn) ✅ Protected demo: chỉ ai đăng nhập mới vào được
 router.get('/secure-demo', ensureAuthenticated, (req, res) => {
@@ -13,10 +13,13 @@ router.get('/secure-demo', ensureAuthenticated, (req, res) => {
     {
       name: "shirt",
       price: 20,
+      ok: true,
+      user: req.user
     }
   ]);
 });
-
+router.get('/', listProducts);
+router.get('/:id', getProductById);
 router.get('/secure', ensureAuthenticated, listProducts);
-
+router.post('/:id/reviews', ensureAuthenticated, addReview);
 module.exports = router;

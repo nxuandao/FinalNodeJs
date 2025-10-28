@@ -36,7 +36,7 @@ function Login() {
       console.log("Login response:", result);
 
       // Lấy key từ API
-      const { success, message, error, jwtToken, user, name } = result;
+      const { success, message, error, jwtToken, user} = result;  //mới xóa name với role trong đây
 
       if (success) {
         handleSuccess(message);
@@ -45,9 +45,17 @@ function Login() {
         //Sau đó lưu id và name
         localStorage.setItem('loggedInUser', user?.name || 'Guest');
         localStorage.setItem('loggedInUserName', user?.name || 'Guest');
-        setTimeout(() => {
+        localStorage.setItem('loggedInUserRole', user?.role || 'user');
+        if (user?.role === 'admin' || user?.role === 'manager') {
+          navigate('/homeAdmin');
+          return; 
+        }
+        else{
           navigate('/home');
-        }, 1000);
+        }
+        // setTimeout(() => {
+        //   navigate('/home');
+        // }, 1000);
       } else if (error) {
         return handleError(
           error?.details?.[0]?.message ||

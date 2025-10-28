@@ -1,14 +1,12 @@
-
 const bcrypt = require('bcrypt');
 const UserModel = require('../Models/User');
 const jwt = require('jsonwebtoken');
 
 const { sendVerificationEmail, sendResetPasswordEmail, sendEmail } = require('../utils/email'); const crypto = require('crypto');
 
-// Signup
 const signup = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password, role, status } = req.body;
 
     // Kiểm tra user tồn tại chưa
     const existingUser = await UserModel.findOne({ email });
@@ -19,20 +17,20 @@ const signup = async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiry = Date.now() + 60 * 60 * 1000;
 
-    // Tạo user mới
     const newUser = new UserModel({
       name,
       email,
       phone,
       password: hashedPassword,
       // address,
-      // activity_log
+      // activity_log: [],
+      role: role || "user", 
+      status: status || "active", 
       verificationToken: token,
       isVerified: false,
       verificationTokenExpiry: new Date(expiry)
@@ -40,7 +38,6 @@ const signup = async (req, res) => {
 
     await newUser.save();
 
-    // Gửi email xác thực
     await sendVerificationEmail(email, token);
 
     res.status(201).json({
@@ -57,7 +54,6 @@ const signup = async (req, res) => {
   }
 };
 
-// Login (placeholder)
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -83,14 +79,11 @@ const login = async (req, res) => {
         success: false
       });
     }
-    // existingUser.activity_log.push({
-    //   action: "Login",
-    //   ip: req.ip,
-    //   userAgent: req.headers["user-agent"],
-    //   time: new Date()
-    // });
+    
+    // Tạo JWT
     await existingUser.save();
-    const jwtToken = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const jwtToken = jwt.sign({ id: existingUser._id, role: existingUser.role  },
+       process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // Ghi log đăng nhập
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.ip;
@@ -112,6 +105,12 @@ const login = async (req, res) => {
       }
     });
 
+    if (existingUser.status === "inactive") {
+  return res.status(403).json({
+    message: "Your account is inactive. Please contact admin.",
+    success: false
+  });
+  } 
 
     res.status(200).json({
       message: "Login successful",
@@ -123,6 +122,8 @@ const login = async (req, res) => {
         email: existingUser.email,
         phone: existingUser.phone,
         address: existingUser.address,
+        role: existingUser.role,
+        status: existingUser.status,
         activity_log: existingUser.activity_log,
         createdAt: existingUser.createdAt,
         updatedAt: existingUser.updatedAt
