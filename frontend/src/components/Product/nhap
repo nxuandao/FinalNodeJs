@@ -1,0 +1,117 @@
+// import React, { useState } from "react";
+// import "../Product/Products.css";
+
+// const ProductsList = () => {
+//   const [products, setProducts] = useState([
+//     { id: 1, name: "iPhone 15", price: "$999", status: "available", quality: 23 },
+//     { id: 2, name: "Samsung Galaxy S24", price: "$899", status: "outofstock", quality: 15 },
+//     { id: 3, name: "Apple Watch Ultra", price: "$799", status: "lowstock", quality: 10 },
+//   ]);
+
+//   const [showModal, setShowModal] = useState(false);
+//   const [newProduct, setNewProduct] = useState({
+//     name: "",
+//     price: "",
+//     status: "available",
+//     quality: "",
+//   });
+
+//   const handleAddProduct = (e) => {
+//     e.preventDefault();
+//     if (!newProduct.name || !newProduct.price || !newProduct.quality) return;
+
+//     const newItem = {
+//       id: products.length + 1,
+//       ...newProduct,
+//     };
+//     setProducts([...products, newItem]);
+//     setNewProduct({ name: "", price: "", status: "available", quality: "" });
+//     setShowModal(false);
+//   };
+
+//   return (
+//     <div className="ProductsList">
+//       <div className="header">
+//         <h1>Products</h1>
+//         <button className="add-btn" onClick={() => setShowModal(true)}>
+//           ＋
+//         </button>
+//       </div>
+
+//       <table>
+//         <thead>
+//           <tr>
+//             <th>ID</th>
+//             <th>Product</th>
+//             <th>Price</th>
+//             <th>Status</th>
+//             <th>Quality</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {products.map((p) => (
+//             <tr key={p.id}>
+//               <td>{p.id}</td>
+//               <td>{p.name}</td>
+//               <td>{p.price}</td>
+//               <td className={`status ${p.status}`}>{p.status}</td>
+//               <td>{p.quality}</td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+
+//       {/* Popup Modal */}
+//       {showModal && (
+//         <div className="modal-overlay">
+//           <div className="modal">
+//             <h2>Add New Product</h2>
+//             <form onSubmit={handleAddProduct}>
+//               <input
+//                 type="text"
+//                 placeholder="Product Name"
+//                 value={newProduct.name}
+//                 onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+//               />
+//               <input
+//                 type="text"
+//                 placeholder="Price (e.g. $99)"
+//                 value={newProduct.price}
+//                 onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+//               />
+//               <input
+//                 type="number"
+//                 placeholder="Quality"
+//                 value={newProduct.quality}
+//                 onChange={(e) => setNewProduct({ ...newProduct, quality: e.target.value })}
+//               />
+//               <select
+//                 value={newProduct.status}
+//                 onChange={(e) => setNewProduct({ ...newProduct, status: e.target.value })}
+//               >
+//                 <option value="available">Available</option>
+//                 <option value="outofstock">Out of Stock</option>
+//                 <option value="lowstock">Low Stock</option>
+//               </select>
+
+//               <div className="modal-buttons">
+//                 <button type="submit" className="submit-btn">
+//                   Add Product
+//                 </button>
+//                 <button
+//                   type="button"
+//                   className="cancel-btn"
+//                   onClick={() => setShowModal(false)}
+//                 >
+//                   Cancel
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ProductsList;

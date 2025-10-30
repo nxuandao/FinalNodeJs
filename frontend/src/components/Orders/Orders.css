@@ -1,0 +1,35 @@
+.OrdersList {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin: 20px;
+}
+
+.OrdersList h2 {
+  margin-bottom: 20px;
+}
+
+.OrdersList table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.OrdersList th, .OrdersList td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.status.delivered {
+  color: #3bb077;
+  font-weight: bold;
+}
+.status.pending {
+  color: #f1c40f;
+  font-weight: bold;
+}
+.status.approved {
+  color: #3498db;
+  font-weight: bold;
+}
