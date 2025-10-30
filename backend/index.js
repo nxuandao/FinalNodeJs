@@ -5,7 +5,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 // Nếu Node < 18, bật 2 dòng dưới để có fetch:
 // const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-
+const AdminCustomerRoutes = require('./Routes/AdminCustomerRoutes');
+const AdminProductRoutes = require('./Routes/AdminProductRoutes');
 require('./Models/db');
 
 const AuthRouter = require('./Routes/AuthRouter');
@@ -59,7 +60,9 @@ app.get('/img-proxy', async (req, res) => {
     res.status(500).send('Proxy error');
   }
 });
+app.use('/auth', AdminCustomerRoutes);
 
+app.use('/admin', AdminProductRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

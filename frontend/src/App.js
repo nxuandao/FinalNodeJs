@@ -58,14 +58,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route
-          path="/homeAdmin"
-          element={
-            <ProtectedRoute role="admin">
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/homeAdmin" element={ <ProtectedRoute role="admin"> <AdminPage /> </ProtectedRoute> } />
+
         <Route path="/product/:id" element={<ProductDetail isLoggedIn={isLoggedIn} />} />
       </Routes>
     </div>
