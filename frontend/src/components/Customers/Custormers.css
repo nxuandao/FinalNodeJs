@@ -1,0 +1,51 @@
+.CustomersList {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin: 20px;
+}
+
+.CustomersList h2 {
+  margin-bottom: 20px;
+}
+
+.CustomersList table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.CustomersList th, .CustomersList td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.status {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  outline: none;
+}
+
+.CustomersList th, .CustomersList td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.status.active {
+  color: #3bb077;
+  font-weight: bold;
+}
+
+.status.inactive {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.status.new {
+  color: #3498db;
+  font-weight: bold;
+}
+

@@ -129,7 +129,6 @@ export default function Header({ isLoggedIn }) {
               onKeyDown={onSearchSubmit}
             />
           </div>
-
           <div className="filterwrap" ref={filterRef}>
             <button
               className="icon-btn"
