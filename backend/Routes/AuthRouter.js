@@ -1,9 +1,10 @@
 const express = require("express");
 const crypto = require("crypto");
-const { signupValidation, loginValidation } = require("../Middlewares/AnthValidation");
+const { signupValidation, loginValidation } = require("../Middlewares/AuthValidation");
 const { signup, login, forgotPassword, resetPassword } = require("../Controllers/AuthController");
 const UserModel = require("../Models/User");
 const { sendVerificationEmail } = require("../utils/email"); 
+const { authenticateJWT, authorizeRoles } = require("../Middlewares/AuthValidation");
 
 const router = express.Router();
 
@@ -27,7 +28,6 @@ router.get("/verify-email", async (req, res) => {
     await user.save();
 
     return res.send("Xác minh email thành công! Bạn có thể đăng nhập.");
-    // return res.redirect(`${process.env.FRONTEND_URL}/verify-success`);
 
   } catch (err) {
     console.error(err);
@@ -58,6 +58,9 @@ router.post("/reset-password/:token", resetPassword);
 
 router.post("/signup", signupValidation, signup);
 router.post("/login", loginValidation, login);
+router.get("/homeAdmin", authenticateJWT, authorizeRoles("admin"), (req, res) => {
+  res.json({ message: "Welcome Admin" });
+});
 router.post("/forgot-password", forgotPassword);
 
 module.exports = router;

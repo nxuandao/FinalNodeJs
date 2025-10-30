@@ -5,6 +5,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const AuthRouter = require('./Routes/AuthRouter');
 const ProductsRouter = require('./Routes/ProductsRouter');
+const AdminCustomerRoutes = require('./Routes/AdminCustomerRoutes');
+const AdminProductRoute = require('./Routes/AdminProductRoutes');
 
 require('dotenv').config();
 require('./Models/db');
@@ -30,6 +32,10 @@ app.use('/auth', AuthRouter);
 app.use('/products', ProductsRouter);
 
 app.use('/auth', require('./Routes/AuthRouter'));
+
+app.use('/auth', AdminCustomerRoutes);
+
+app.use('/admin', AdminProductRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
