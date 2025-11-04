@@ -86,9 +86,7 @@ const signupValidation = (req, res, next) => {
 };
 
 
-module.exports = {
-    signupValidation
-}
+
 
 const loginValidation = (req, res, next)=>{
     const schema = Joi.object({
@@ -103,6 +101,7 @@ const loginValidation = (req, res, next)=>{
 }
 
 module.exports = {
+  
     signupValidation,
     loginValidation,
     authenticateJWT,

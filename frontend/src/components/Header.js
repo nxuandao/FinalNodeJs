@@ -198,21 +198,39 @@ export default function Header({ isLoggedIn }) {
             </button>
           )}
 
-          {isLoggedIn ? (
-            <button
-              className="icon-btn"
-              onClick={() => navigate("/profile")}
-              aria-label="Trang cá nhân"
-              title="Trang cá nhân"
-              type="button"
-            >
-              <AccountCircleIcon />
-            </button>
-          ) : (
-            <Link to="/login" className="btn btn--sm btn--primary">
-              Login
-            </Link>
-          )}
+         {isLoggedIn ? (
+  (() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const avatar =
+      user?.avatar ||
+      "https://cdn-icons-png.flaticon.com/512/847/847969.png"; // ảnh mặc định
+
+    return (
+      <div className="nav-user">
+        <img
+          src={avatar}
+          alt={user?.name || "User"}
+          className="avatar"
+          onClick={() => navigate("/profile")}
+          title={user?.name || "Trang cá nhân"}
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            cursor: "pointer",
+            objectFit: "cover",
+            marginLeft: 8,
+          }}
+        />
+      </div>
+    );
+  })()
+) : (
+  <Link to="/login" className="btn btn--sm btn--primary">
+    Login
+  </Link>
+)}
+
         </div>
       </div>
     </header>
