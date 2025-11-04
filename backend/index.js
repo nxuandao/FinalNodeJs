@@ -13,6 +13,11 @@ const AuthRouter = require('./Routes/AuthRouter');
 const ProductsRouter = require('./Routes/ProductsRouter');
 
 const app = express();
+const userRoutes = require("./Routes/UserRouter");
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
 const PORT = process.env.PORT || 8080;
 
 /* --- Security headers / CSP: cho phép ảnh từ https, data:, blob: --- */
@@ -42,7 +47,7 @@ app.get('/ping', (req, res) => res.send('Pong'));
 /* --- Routes --- */
 app.use('/auth', AuthRouter);
 app.use('/products', ProductsRouter);
-
+app.use("/users", userRoutes);
 /* --- (Tuỳ chọn) Image proxy: dùng nếu nguồn ảnh chặn/hotlink/CORS --- */
 app.get('/img-proxy', async (req, res) => {
   try {
@@ -63,6 +68,7 @@ app.get('/img-proxy', async (req, res) => {
 app.use('/auth', AdminCustomerRoutes);
 
 app.use('/admin', AdminProductRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

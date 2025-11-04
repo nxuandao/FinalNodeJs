@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { handleError, handleSuccess } from '../utils';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { handleError, handleSuccess } from "../utils";
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const navigate = useNavigate();
@@ -21,54 +20,69 @@ function Login() {
     e.preventDefault();
     const { email, password } = loginInfo;
     if (!email || !password) {
-      return handleError('All fields are required');
+      return handleError("All fields are required");
     }
 
     try {
       const url = "http://localhost:8080/auth/login";
       const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginInfo)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginInfo),
       });
 
       const result = await response.json();
-      console.log("Login response:", result);
+      console.log("🔹 Login response:", result);
 
-      // Lấy key từ API
-      const { success, message, error, jwtToken, user} = result;  //mới xóa name với role trong đây
+      const { success, message, error, jwtToken, user } = result;
 
       if (success) {
         handleSuccess(message);
-        //Cái này lưu token vào localStorage
-        localStorage.setItem('token', jwtToken);
-        //Sau đó lưu id và name
-        localStorage.setItem('loggedInUser', user?.name || 'Guest');
-        localStorage.setItem('loggedInUserName', user?.name || 'Guest');
-        localStorage.setItem('loggedInUserRole', user?.role || 'user');
-        if (user?.role === 'admin' || user?.role === 'manager') {
-          navigate('/homeAdmin');
-          return; 
+
+        // ✅ Normalize user object — luôn có _id, name, role
+        const normalizedUser = {
+          ...user,
+          _id: user?._id || user?.id || user?.userId || "",
+          name: user?.name || "Guest",
+          role: user?.role || "user",
+        };
+
+        // ✅ Lưu thông tin đăng nhập
+        localStorage.setItem("token", jwtToken);
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
+        localStorage.setItem("loggedInUser", normalizedUser.name);
+        localStorage.setItem("loggedInUserName", normalizedUser.name);
+        localStorage.setItem("loggedInUserRole", normalizedUser.role);
+
+        // ✅ Trigger event để đồng bộ với App / Navbar
+        window.dispatchEvent(new Event("auth"));
+
+        // ✅ Chuyển hướng chính xác theo role
+        if (
+          normalizedUser.role === "admin" ||
+          normalizedUser.role === "manager"
+        ) {
+          navigate("/homeAdmin");
+        } else {
+          navigate("/home");
         }
-        else{
-          navigate('/home');
-        }
-        // setTimeout(() => {
-        //   navigate('/home');
-        // }, 1000);
       } else if (error) {
         return handleError(
           error?.details?.[0]?.message ||
-          error?.message ||
-          message ||
-          'Something went wrong. Please check your email or password.'
+            error?.message ||
+            message ||
+            "Invalid email or password."
         );
       } else {
-        return handleError(message || 'Something went wrong. Please try again later.');
+        return handleError(
+          message || "Something went wrong. Please try again later."
+        );
       }
     } catch (err) {
-      console.error(err);
-      return handleError(err.message || 'Something went wrong. Please try again later.');
+      console.error("❌ Login error:", err);
+      return handleError(
+        err.message || "Something went wrong. Please try again later."
+      );
     }
   };
 
@@ -96,6 +110,7 @@ function Login() {
                   value={loginInfo.email}
                 />
               </div>
+
               <label htmlFor="password">Password</label>
               <div className="form-group">
                 <input
@@ -114,7 +129,9 @@ function Login() {
               </div>
             </div>
           </form>
+
           <ToastContainer />
+
           <div className="redirect-link">
             <center>
               Forgot your password? <Link to="/forgotPassword">Reset</Link>
@@ -122,14 +139,16 @@ function Login() {
           </div>
           <div className="redirect-link">
             <center>
-              Doesn't have an account? <Link to="/signup">Signup</Link>
+              Don't have an account? <Link to="/signup">Signup</Link>
             </center>
           </div>
+
           <p className="terms">
-            By registering your details, you agree with our{" "}
-            <a href="#">Terms & Conditions</a>, and{" "}
-            <a href="#">Privacy and Cookie Policy</a>.
+            By logging in, you agree with our{" "}
+            <a href="#">Terms & Conditions</a> and{" "}
+            <a href="#">Privacy Policy</a>.
           </p>
+
           <div className="social-links">
             <a href="#">Facebook</a> · <a href="#">LinkedIn</a> ·{" "}
             <a href="#">Google</a>
