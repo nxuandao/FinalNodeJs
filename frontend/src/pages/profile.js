@@ -75,6 +75,33 @@ export default function Profile() {
     phone: "",
     isDefault: false,
   });
+const deleteAddress = async (id) => {
+  if (!window.confirm("Bạn có chắc muốn xoá địa chỉ này không?")) return;
+
+  try {
+    // Lấy lại user mới nhất từ localStorage (có thể chứa các địa chỉ khác)
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const fullList = storedUser.addresses || [];
+
+    // Lọc phần tử cần xóa
+    const updatedList = fullList.filter((a) => a.id !== id);
+
+    await updateUserInfo({ addresses: updatedList });
+
+    // Cập nhật localStorage & state
+    localStorage.setItem("user", JSON.stringify({
+      ...storedUser,
+      addresses: updatedList,
+    }));
+
+    setAddresses(updatedList);
+    alert("✅ Đã xoá địa chỉ!");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Không thể xoá địa chỉ!");
+  }
+};
+
 
   // ====== PASSWORD STATE ======
   const [curPass, setCurPass] = useState("");
@@ -93,6 +120,38 @@ export default function Profile() {
       console.error("Error loading user info:", err);
     }
   }, []);
+  // 🧩 Load user info từ MongoDB
+useEffect(() => {
+  const fetchUserFromServer = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const token = localStorage.getItem("token");
+      if (!storedUser._id || !token) return;
+
+      const res = await fetch(`${API_BASE}/users/${storedUser._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (data.success && data.user) {
+        const u = data.user;
+        setFullName(u.name || "");
+        setEmail(u.email || "");
+        setPhone(u.phone || "");
+        setAvatar(u.avatar || "https://i.pravatar.cc/200?img=12");
+        setAddresses(u.addresses || []);
+
+        // Cập nhật localStorage để đồng bộ
+        localStorage.setItem("user", JSON.stringify(u));
+      }
+    } catch (err) {
+      console.error("❌ Lỗi khi tải thông tin user:", err);
+    }
+  };
+
+  fetchUserFromServer();
+}, []);
+
 
   // 📤 Cập nhật thông tin user lên server
   const updateUserInfo = async (patch) => {
@@ -187,36 +246,52 @@ const saveAddress = async (e) => {
   e.preventDefault();
 
   const form = { ...addrForm };
-  const addressPayload = {
-    street: form.line,
+  const newAddress = {
+    id: form.id || crypto.randomUUID(),
+    label: form.label,
+    line: form.line,
     city: form.city,
-    houseNumber: form.label,
+    district: form.district,
     ward: form.ward,
+    phone: form.phone,
+    isDefault: form.isDefault,
   };
 
   try {
-    // 🔹 Gọi API cập nhật
-    await updateUserInfo({ address: addressPayload });
+    let updatedList;
 
-    // ✅ Hiển thị alert 1 lần thôi
-    alert("Cập nhật địa chỉ thành công!");
+    if (editing === "new") {
+      // 👉 Thêm mới
+      updatedList = [...addresses, newAddress];
+    } else {
+      // 👉 Sửa
+      updatedList = addresses.map((a) =>
+        a.id === form.id ? newAddress : a
+      );
+    }
 
-    // ✅ Sau khi bấm OK, reset trạng thái
+    // 🧠 Gửi toàn bộ mảng đầy đủ lên backend
+    await updateUserInfo({ addresses: updatedList });
+
+    // 🧠 Lưu vào localStorage
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem("user") || "{}"),
+        addresses: updatedList,
+      })
+    );
+
+    setAddresses(updatedList);
     setEditing(null);
-
-    // 🔹 Nếu bạn có state addresses thì cập nhật lại luôn
-    setAddresses((prev) => {
-      let next = [...prev];
-      const idx = next.findIndex((a) => a.id === form.id);
-      if (idx >= 0) next[idx] = form;
-      else next.push(form);
-      return next;
-    });
+    alert("✅ Cập nhật địa chỉ thành công!");
   } catch (err) {
     console.error(err);
-    alert("Cập nhật địa chỉ thất bại, vui lòng thử lại!");
+    alert("❌ Cập nhật địa chỉ thất bại!");
   }
 };
+
+
 
 
   const setDefaultAddress = (id) => {
@@ -464,8 +539,6 @@ const changePassword = async (e) => {
   </div>
 )}
 
-
-  {/* 📍 Sổ địa chỉ */}
  {/* 📍 Sổ địa chỉ */}
 {section === "address" && (
   <div className="pf-panel">
@@ -480,36 +553,25 @@ const changePassword = async (e) => {
       <h3>Sổ địa chỉ</h3>
 
       {/* Nút Thêm địa chỉ */}
-      {!editing && addresses.length === 0 && (
+     
         <button
-          className="btn btn--primary btn--sm"
-          onClick={() => {
-            setEditing("new");
-            setAddrForm({
-              id: crypto.randomUUID(),
-              label: "",
-              line: "",
-              city: "",
-              district: "",
-              ward: "",
-              phone: "",
-              isDefault: false,
-            });
-          }}
-        >
-          ➕ Thêm địa chỉ
-        </button>
-      )}
-
-      {/* Khi đã có địa chỉ thì hiển thị nút Chỉnh sửa */}
-      {!editing && addresses.length > 0 && (
-        <button
-          className="btn btn--primary btn--sm"
-          onClick={() => beginEditAddress(addresses[0])}
-        >
-          🖊️ Chỉnh sửa địa chỉ
-        </button>
-      )}
+        className="btn btn--primary btn--sm"
+        onClick={() => {
+          setEditing("new");
+          setAddrForm({
+            id: crypto.randomUUID(),
+            label: "",
+            line: "",
+            city: "",
+            district: "",
+            ward: "",
+            phone: "",
+            isDefault: false,
+          });
+        }}
+      >
+        ➕ Thêm địa chỉ
+      </button>
     </div>
 
     {/* Khi chưa có địa chỉ */}
@@ -517,29 +579,50 @@ const changePassword = async (e) => {
       <p>Chưa có địa chỉ nào. Hãy thêm địa chỉ mới để thuận tiện giao hàng!</p>
     )}
 
-    {/* Khi đã có địa chỉ */}
-    {!editing && addresses.length > 0 && (
+   {/* Khi đã có địa chỉ */}
+{!editing && addresses.length > 0 && (
+  <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
+    {addresses.map((addr, idx) => (
       <div
+        key={idx}
         style={{
+          position: "relative",
           border: "1px solid #e5e7eb",
           borderRadius: 12,
           padding: 12,
-          maxWidth: 560,
         }}
       >
-        <div><strong>{addresses[0].label}</strong></div>
-        <div>{addresses[0].line}</div>
+        <div><strong>{addr.label || `Địa chỉ ${idx + 1}`}</strong></div>
+        <div>{addr.line}</div>
         <div>
-          {addresses[0].ward}, {addresses[0].district}, {addresses[0].city}
+          {addr.ward}, {addr.district}, {addr.city}
         </div>
-        <div>📞 {addresses[0].phone}</div>
-        {addresses[0].isDefault && (
+        <div>📞 {addr.phone}</div>
+        {addr.isDefault && (
           <div style={{ color: "#2563eb", marginTop: 4 }}>
             (Địa chỉ mặc định)
           </div>
         )}
+         {/* 🧩 Nút sửa / xóa */}
+        <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 8 }}>
+          <button
+            className="btn btn--sm"
+            onClick={() => beginEditAddress(addr)}
+          >
+            ✏️ Sửa
+          </button>
+          <button
+            className="btn btn--sm btn--danger"
+            onClick={() => deleteAddress(addr.id)}
+          >
+            🗑️ Xoá
+          </button>
+        </div>
       </div>
-    )}
+    ))}
+  </div>
+)}
+
 
     {/* Khi đang thêm hoặc chỉnh sửa */}
     {editing && (

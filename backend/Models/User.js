@@ -7,11 +7,14 @@ const mongoose = require('mongoose');
 //   ward: { type: String, required: false }
 // }, { _id: false }); 
 const addressSchema = new mongoose.Schema({
-  street: { type: String, default: "" },
+  label: { type: String, default: "" },
+  line: { type: String, default: "" },         // ✅ sửa street → line
   city: { type: String, default: "" },
-  houseNumber: { type: String, default: "" },
-  ward: { type: String, default: "" }
-}, { _id: false });
+  district: { type: String, default: "" },
+  ward: { type: String, default: "" },
+  phone: { type: String, default: "" },
+  isDefault: { type: Boolean, default: false }
+});
 
 
 const UserSchema = new mongoose.Schema({
@@ -36,9 +39,9 @@ const UserSchema = new mongoose.Schema({
   type: String,
   default: ""
 },
-  address: {
-    type: addressSchema,
-    default: {}
+  addresses: {
+    type: [addressSchema],
+    default: []
   },
   role: {  
     type: String,

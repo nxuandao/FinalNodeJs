@@ -8,7 +8,7 @@ const router = express.Router();
 router.put("/update/:id", authenticateJWT, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, address, avatar } = req.body;
+    const { name, phone, addresses, avatar } = req.body;
 
     const user = await UserModel.findById(id);
     if (!user) {
@@ -19,15 +19,9 @@ router.put("/update/:id", authenticateJWT, async (req, res) => {
     if (phone) user.phone = phone;
     if (avatar) user.avatar = avatar;
 
-    // ✅ Cập nhật địa chỉ (nếu gửi từ frontend)
-    if (address) {
-      user.address = {
-        street: address.street || user.address.street,
-        city: address.city || user.address.city,
-        houseNumber: address.houseNumber || user.address.houseNumber,
-        ward: address.ward || user.address.ward,
-      };
-    }
+    if (Array.isArray(addresses)) {
+  user.addresses = addresses;
+}
 
     await user.save();
 
@@ -119,6 +113,21 @@ router.put("/change-password", authenticateJWT, async (req, res) => {
     res.json({ success: true, message: "Đổi mật khẩu thành công" });
   } catch (err) {
     console.error("❌ Change password error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+// ✅ Lấy thông tin user theo ID
+router.get("/:id", authenticateJWT, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("❌ Get user error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
