@@ -138,7 +138,12 @@ useEffect(() => {
         setFullName(u.name || "");
         setEmail(u.email || "");
         setPhone(u.phone || "");
-        setAvatar(u.avatar || "https://i.pravatar.cc/200?img=12");
+      setAvatar(
+  u.avatar?.startsWith("http")
+    ? u.avatar
+    : `${API_BASE}${u.avatar}`
+);
+
         setAddresses(u.addresses || []);
 
         // Cập nhật localStorage để đồng bộ
@@ -199,12 +204,18 @@ useEffect(() => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      const newUrl = `${API_BASE}${data.avatarUrl}`;
-      setAvatar(newUrl);
+      const avatarUrl = data.avatarUrl.startsWith("http")
+      ? data.avatarUrl
+      : `${API_BASE}${data.avatarUrl}`;
 
-      setShowAvatarMenu(false);
+    setAvatar(avatarUrl);
+    setShowAvatarMenu(false);
 
-      await updateUserInfo({ avatar: newUrl });
+      const savedPath = data.avatarUrl.startsWith("http")
+      ? data.avatarUrl.replace(API_BASE, "")
+      : data.avatarUrl;
+
+    await updateUserInfo({ avatar: savedPath });
     } catch (err) {
       console.error(err);
       alert("Tải ảnh thất bại, vui lòng thử lại!");

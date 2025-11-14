@@ -56,11 +56,131 @@ const updateProductQuantity = async (req, res) => {
     console.error("Error updating product quantity:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
+  
+
 };
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const createProduct = async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    console.error("Error creating product:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+const updateProductStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const product = await Product.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
+    }
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    console.error("Error updating product status:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
+
+// ✅ Cập nhật thông tin sản phẩm (dành cho trang EditProduct)
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      brand,
+      description,
+      producttype,
+      price,
+      gender,
+      images,
+      sizes,
+      colors,
+    } = req.body;
+
+    console.log("📤 Nhận dữ liệu từ frontend:", req.body);
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy sản phẩm để cập nhật!",
+      });
+    }
+
+    // 🧩 Cập nhật thông tin cơ bản
+    if (name) product.name = name;
+    if (brand) product.brand = brand;
+    if (description) product.description = description;
+    if (producttype) product.producttype = producttype;
+    if (price) product.price = price;
+    if (gender) product.gender = gender;
+    if (sizes) product.sizes = sizes;
+    if (colors) product.colors = colors;
+
+    // 🖼️ Cập nhật mảng ảnh (gộp ảnh mới + giữ ảnh cũ)
+    if (Array.isArray(images) && images.length > 0) {
+      const merged = [...new Set([...(product.images || []), ...images])];
+      product.images = merged;
+      product.markModified("images"); // 👈 ép mongoose lưu lại
+      console.log("✅ Ảnh sau khi merge:", merged);
+    }
+
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      message: "✅ Cập nhật sản phẩm thành công!",
+      data: product,
+    });
+  } catch (error) {
+    console.error("❌ Lỗi khi cập nhật sản phẩm:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi cập nhật sản phẩm",
+      error: error.message,
+    });
+  }
+};
+
+
+
 
 
 module.exports = {
   getAllProductsAdmin,
   listProducts,
-  updateProductQuantity
+  updateProductQuantity,
+  getProductById,
+  createProduct,
+  updateProductStatus,
+  updateProduct, 
 };
+
+

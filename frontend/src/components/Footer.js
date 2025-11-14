@@ -5,62 +5,62 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="container footer__grid">
         <div className="footer__col">
-          <h4 className="footer__title">Company</h4>
-          <p className="footer__muted">
-            Find a location nearest you. See Our Stores
-          </p>
+          <h4 className="footer__title">Cửa hàng</h4>
           <p className="footer__muted">0123 456 789</p>
           <p className="footer__muted">ourshop@gmail.com</p>
         </div>
+
         <div className="footer__col">
-          <h4 className="footer__title">Useful Links</h4>
+          <h4 className="footer__title">Liên kết hữu ích</h4>
           <ul className="footer__list">
             <li>
-              <Link to="/store">New Products</Link>
+              <Link to="/store">Sản phẩm mới</Link>
             </li>
             <li>
-              <Link to="/store">Best Sellers</Link>
+              <Link to="/store">Bán chạy nhất</Link>
             </li>
             <li>
-              <Link to="/store">Bundle & Save</Link>
+              <Link to="/store">Mua combo tiết kiệm</Link>
             </li>
             <li>
-              <Link to="/store">Online Gift Card</Link>
+              <Link to="/store">Thẻ quà tặng trực tuyến</Link>
             </li>
           </ul>
         </div>
+
         <div className="footer__col">
-          <h4 className="footer__title">Information</h4>
+          <h4 className="footer__title">Thông tin</h4>
           <ul className="footer__list">
             <li>
-              <Link to="/return">Start A Return</Link>
+              <Link to="/return">Bắt đầu đổi trả</Link>
             </li>
             <li>
-              <Link to="/contact">Contact Us</Link>
+              <Link to="/contact">Liên hệ</Link>
             </li>
             <li>
-              <Link to="/faq">Shipping FAQ</Link>
+              <Link to="/faq">Câu hỏi về vận chuyển</Link>
             </li>
             <li>
-              <Link to="/terms">Terms & Conditions</Link>
+              <Link to="/terms">Điều khoản & Điều kiện</Link>
             </li>
             <li>
-              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/privacy">Chính sách bảo mật</Link>
             </li>
           </ul>
         </div>
+
         <div className="footer__col">
-          <h4 className="footer__title">Good emails.</h4>
+          <h4 className="footer__title">Nhận email ưu đãi</h4>
           <p className="footer__muted">
-            Enter your email below to be the first to know about new collections
-            and product launches.
+            Nhập email của bạn để là người đầu tiên biết về các bộ sưu tập và
+            sản phẩm mới ra mắt.
           </p>
           <div className="footer__subscribe">
             <input
               className="footer__input"
-              placeholder="Enter your email address"
+              placeholder="Nhập địa chỉ email của bạn"
             />
-            <button className="btn btn--primary btn--sm">Subscribe</button>
+            <button className="btn btn--primary btn--sm">Đăng ký</button>
           </div>
           <div className="footer__payments">
             <span>VISA</span>
@@ -70,9 +70,10 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
       <div className="footer__bottom">
         <div className="container footer__bottomInner">
-          <span>© OurShop 2025</span>
+          <span>© OurShop </span>
           <span className="footer__brand">OURSHOP</span>
         </div>
       </div>

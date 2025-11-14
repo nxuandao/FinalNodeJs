@@ -122,6 +122,7 @@ const listProducts = async (req, res) => {
   }
 };
 
+
 // ✅ mới: lấy chi tiết
 const getProductById = async (req, res) => {
   try {

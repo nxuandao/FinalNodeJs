@@ -50,7 +50,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + unique + ext);
+    cb(null, `avatar-${unique}${ext}`);
   },
 });
 const upload = multer({ storage });
@@ -67,7 +67,7 @@ router.post(
       }
 
       const userId = req.user?.id;
-      const avatarUrl = `/uploads/${req.file.filename}`;
+    const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
 
       // Cập nhật avatar cho user trong DB
       if (userId) {
