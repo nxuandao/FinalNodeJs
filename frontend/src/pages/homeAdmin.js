@@ -1,31 +1,24 @@
+// src/pages/AdminPage.jsx
 import React from "react";
 import "../admin.css";
-// import Sidebar from "../components/Sidebar/Sidebar";
-import MainDash from "../components/MainDash/MainDash";
-import RightSide from '../components/RightSide/RightSide';
 import Sidebar from "../components/Sidebar";
-// import RightSide from "../components/RightSide/RightSide";
-import OrdersList from "../components/Orders/Orders";
-import CustomersList from "../components/Customers/Custormers";
-import ProductsList from "../components/Product/Products";
-import AnalyticsPage from "../components/Analytics/Analytics";
-import { useState } from "react";
+import RightSide from "../components/RightSide/RightSide";
+import { Outlet } from "react-router-dom"; // ✅ thêm dòng này
 
 function AdminPage() {
-  const [activePage, setActivePage] = useState("Dashboard");
-
   return (
     <div className="AdminPage">
-      <div className = "Admin_OurStore">
-        <Sidebar setActivePage={setActivePage} />
-        {/* {activePage === "Dashboard" && <MainDash />}
-        {activePage === "Orders" && <OrdersList />} */}
-        {activePage === "Dashboard" && <MainDash />}
-        {activePage === "Orders" && <OrdersList />}
-        {activePage === "Customers" && <CustomersList />}
-        {activePage === "Products" && <ProductsList />}
-        {activePage === "Analytics" && <AnalyticsPage />}
-        <RightSide/>
+      <div className="Admin_OurStore">
+        {/* Sidebar luôn hiện */}
+        <Sidebar />
+
+        {/* Đây là phần thay đổi khi route đổi */}
+        <div className="main-content" style={{ flex: 1, padding: "10px" }}>
+          <Outlet /> {/* 📍React Router sẽ render trang con ở đây */}
+        </div>
+
+        {/* RightSide cố định */}
+        <RightSide />
       </div>
     </div>
   );

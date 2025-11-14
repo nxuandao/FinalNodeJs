@@ -1,74 +1,106 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-// Nếu Node < 18, bật 2 dòng dưới để có fetch:
-// const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-const AdminCustomerRoutes = require('./Routes/AdminCustomerRoutes');
-const AdminProductRoutes = require('./Routes/AdminProductRoutes');
-require('./Models/db');
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const path = require("path");
 
-const AuthRouter = require('./Routes/AuthRouter');
-const ProductsRouter = require('./Routes/ProductsRouter');
+require("./Models/db"); // ✅ Kết nối MongoDB trước khi chạy routes
+
+// ✅ Import routes
+const AdminCustomerRoutes = require("./Routes/AdminCustomerRoutes");
+const AdminProductRoutes = require("./Routes/AdminProductRoutes");
+const AuthRouter = require("./Routes/AuthRouter");
+const ProductsRouter = require("./Routes/ProductsRouter");
+const userRoutes = require("./Routes/UserRouter");
+const uploadRoutes = require("./Routes/UpLoadRouter"); // ✅ Upload route (Cloudinary)
 
 const app = express();
-const userRoutes = require("./Routes/UserRouter");
-const path = require("path");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-
 const PORT = process.env.PORT || 8080;
 
-/* --- Security headers / CSP: cho phép ảnh từ https, data:, blob: --- */
-app.use(helmet({
-  contentSecurityPolicy: {
-    useDefaults: true,
-    directives: {
-      // nới lỏng img-src để <img> load được ảnh Cloudinary/hstatic...
-      "img-src": ["'self'", "data:", "https:", "blob:"],
+/* --- ✅ 1. CORS phải bật TRƯỚC mọi routes --- */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // CRA
+      "http://localhost:5173", // Vite
+      process.env.FRONTEND_URL, // Nếu deploy FE
+      process.env.FRONTEND_ORIGIN, // thêm fallback
+    ].filter(Boolean),
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+/* --- ✅ 2. Helmet bảo mật, cho phép ảnh Cloudinary / HTTPS / data URLs --- */
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "img-src": [
+  "'self'",
+  "data:",
+  "blob:",
+  "https:",
+  "http:",
+  "http://localhost:8080",
+  "http://localhost:3000",
+  "http://localhost:5173"
+],
+
+      },
     },
+  })
+);
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
   },
-}));
+  express.static(path.join(__dirname, "uploads"))
+);
 
-/* --- CORS --- */
-app.use(cors({
-  // cho phép cả CRA (3000) và Vite (5173); thêm FRONTEND_ORIGIN nếu có
-  origin: [/^http:\/\/localhost:(3000|5173)$/, process.env.FRONTEND_ORIGIN].filter(Boolean),
-  credentials: true,
-}));
 
+
+
+/* --- ✅ 4. Middleware cơ bản --- */
 app.use(express.json());
-app.set('trust proxy', true);
+app.set("trust proxy", true);
 
-/* --- Healthcheck --- */
-app.get('/ping', (req, res) => res.send('Pong'));
+/* --- ✅ 5. Healthcheck --- */
+app.get("/ping", (req, res) => res.send("Pong"));
 
-/* --- Routes --- */
-app.use('/auth', AuthRouter);
-app.use('/products', ProductsRouter);
+/* --- ✅ 6. Các routes --- */
+app.use("/auth", AuthRouter);
+app.use("/products", ProductsRouter);
 app.use("/users", userRoutes);
-/* --- (Tuỳ chọn) Image proxy: dùng nếu nguồn ảnh chặn/hotlink/CORS --- */
-app.get('/img-proxy', async (req, res) => {
+app.use("/auth", AdminCustomerRoutes);
+
+// ⚠️ Đặt upload route TRƯỚC admin product route
+app.use("/admin", uploadRoutes);
+app.use("/admin", AdminProductRoutes);
+
+/* --- ✅ 7. (Optional) Image proxy (cho ảnh Cloudinary/hotlink) --- */
+app.get("/img-proxy", async (req, res) => {
   try {
     const url = req.query.url;
-    if (!url) return res.status(400).send('Missing url');
-    const r = await fetch(url); // Node 18+ có global fetch
-    if (!r.ok) return res.status(r.status).send('Upstream error');
+    if (!url) return res.status(400).send("Missing url");
+    const r = await fetch(url);
+    if (!r.ok) return res.status(r.status).send("Upstream error");
 
-    res.set('Content-Type', r.headers.get('content-type') || 'image/jpeg');
-    // có thể thêm cache:
-    res.set('Cache-Control', 'public, max-age=86400');
+    res.set("Content-Type", r.headers.get("content-type") || "image/jpeg");
+    res.set("Cache-Control", "public, max-age=86400");
     r.body.pipe(res);
   } catch (e) {
-    console.error('img-proxy error:', e);
-    res.status(500).send('Proxy error');
+    console.error("img-proxy error:", e);
+    res.status(500).send("Proxy error");
   }
 });
-app.use('/auth', AdminCustomerRoutes);
 
-app.use('/admin', AdminProductRoutes);
-
+/* --- ✅ 8. Start server --- */
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
 });

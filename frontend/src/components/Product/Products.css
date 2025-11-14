@@ -237,3 +237,60 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.variant-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.variant-table th,
+.variant-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.variant-table th {
+  background-color: #f7f7f7;
+  font-weight: bold;
+}
+.status-dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        .status-select {
+          border: none;
+          background: transparent;
+          font-weight: 600;
+          font-size: 15px;
+          cursor: pointer;
+          appearance: none;
+          padding-right: 20px;
+        }
+
+        /* Mũi tên ▼ */
+        .status-select::after {
+          content: '▼';
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 10px;
+          pointer-events: none;
+        }
+
+        /* Màu khi Active */
+        .status-select.active {
+          color: #16a34a; /* xanh lá */
+        }
+
+        /* Màu khi Inactive */
+        .status-select.inactive {
+          color: #dc2626; /* đỏ */
+        }
+
+        .status-select option {
+          color: black;
+        }
+

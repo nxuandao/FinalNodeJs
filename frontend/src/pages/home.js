@@ -92,22 +92,42 @@ export default function Home({ isLoggedIn }) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    const raw = Array.isArray(json?.data) ? json.data : [];
-    return raw.map((p) => {
-      const first = Array.isArray(p.images)
-        ? String(p.images[0] || "").trim()
-        : "";
-      const preferred =
-        (p.image && String(p.image).trim()) || first || PLACEHOLDER_IMG;
-      const clean = normalizeUrl(preferred);
-      return {
-        id: p._id || p.id,
-        name: p.name ?? "",
-        price: Number(p.price ?? 0),
-        image: clean,
-        images: Array.isArray(p.images) ? p.images.map(normalizeUrl) : [clean],
-      };
-    });
+  const raw = Array.isArray(json?.data) ? json.data : [];
+return raw.map((p) => {
+  const first = Array.isArray(p.images)
+    ? String(p.images[0] || "").trim()
+    : "";
+
+let preferred =
+    (p.image && String(p.image).trim()) || first || PLACEHOLDER_IMG;
+  if (preferred && !preferred.startsWith("/") && !preferred.startsWith("http")) {
+  preferred = "/" + preferred;
+}
+
+  // ✅ Nếu là đường dẫn cục bộ (local), thêm API_BASE vào trước
+  const clean = preferred.startsWith("http")
+    ? normalizeUrl(preferred)
+    : normalizeUrl(
+        `${API_BASE}${preferred.startsWith("/") ? preferred : "/" + preferred}`
+      );
+
+  return {
+    id: p._id || p.id,
+    name: p.name ?? "",
+    price: Number(p.price ?? 0),
+    image: clean,
+    images: Array.isArray(p.images)
+      ? p.images.map((i) =>
+          i.startsWith("http")
+            ? normalizeUrl(i)
+            : normalizeUrl(
+                `${API_BASE}${i.startsWith("/") ? i : "/" + i}`
+              )
+        )
+      : [clean],
+  };
+});
+
   };
 
   useEffect(() => {

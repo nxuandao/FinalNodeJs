@@ -198,12 +198,21 @@ export default function Header({ isLoggedIn }) {
             </button>
           )}
 
-         {isLoggedIn ? (
+{isLoggedIn ? (
   (() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const avatar =
+    const API_BASE =
+      import.meta.env?.VITE_API_BASE || "http://localhost:8080";
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    let avatar =
       user?.avatar ||
-      "https://cdn-icons-png.flaticon.com/512/847/847969.png"; // ảnh mặc định
+      "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+    // ✅ Nếu avatar là đường dẫn local (chưa có http), thêm API_BASE
+    if (avatar && !avatar.startsWith("http")) {
+      if (!avatar.startsWith("/")) avatar = "/" + avatar;
+      avatar = `${API_BASE}${avatar}`;
+    }
 
     return (
       <div className="nav-user">
@@ -230,6 +239,7 @@ export default function Header({ isLoggedIn }) {
     Login
   </Link>
 )}
+
 
         </div>
       </div>
