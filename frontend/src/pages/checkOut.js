@@ -10,11 +10,20 @@ function currencyVND(n) {
 
 export default function Checkout({ isLoggedIn }) {
   const navigate = useNavigate();
+  const user = useMemo(() => {
+  try {
+    return JSON.parse(localStorage.getItem("user")) || null;
+  } catch {
+    return null;
+  }
+}, []);
 
   const [cart, setCart] = useState([]);
   const [shipping, setShipping] = useState("standard"); // standard | express
   const [payment, setPayment] = useState("cod"); // cod | momo | vnpay
-  const [note, setNote] = useState("");
+ 
+const [addresses, setAddresses] = useState([]);
+const [selectedAddress, setSelectedAddress] = useState(null);
 
   const [contact, setContact] = useState({
     fullName: "",
@@ -22,12 +31,15 @@ export default function Checkout({ isLoggedIn }) {
     email: "",
   });
 
-  const [address, setAddress] = useState({
-    line: "",
-    ward: "",
-    district: "",
-    city: "",
-  });
+const [address, setAddress] = useState({
+  line: "",
+  ward: "",
+  district: "",
+  city: "",
+  phone: "",
+});
+
+
 
   const [orderDone, setOrderDone] = useState(null); // {code, total}
 
@@ -35,8 +47,42 @@ export default function Checkout({ isLoggedIn }) {
     if (!isLoggedIn) return; // vẫn cho xem nhưng khi đặt mới check
     // load cart
     try {
-      const raw = localStorage.getItem("cart");
-      setCart(raw ? JSON.parse(raw) : []);
+      if (user) {
+  setContact({
+    fullName: user.name || "",
+    phone: user.phone || "",
+    email: user.email || "",
+  });
+}
+
+     const rawCart = localStorage.getItem("cart");
+const rawKeys = localStorage.getItem("cart_selected_keys");
+
+let fullCart = rawCart ? JSON.parse(rawCart) : [];
+let keys = rawKeys ? JSON.parse(rawKeys) : [];
+
+if (Array.isArray(keys) && keys.length > 0) {
+  // chỉ lấy các sản phẩm được tick chọn
+  fullCart = fullCart.filter((item) => {
+    const key = `${item.id || ""}__${item.color || ""}__${item.size || ""}`;
+    return keys.includes(key);
+  });
+} else {
+  // nếu không chọn sản phẩm nào -> báo lỗi
+  alert("Bạn chưa chọn sản phẩm nào, vui lòng chọn sản phẩm để tiếp tục mua hàng.");
+  navigate("/cart");
+}
+
+setCart(fullCart);
+  //const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const list = Array.isArray(user.addresses) ? user.addresses : [];
+
+  setAddresses(list);
+
+  // set địa chỉ mặc định
+  const def = list.find(a => a.isDefault);
+
+  setSelectedAddress(def ? def : list[0] || null);
     } catch {
       setCart([]);
     }
@@ -52,6 +98,7 @@ export default function Checkout({ isLoggedIn }) {
             fullName: c.fullName || "Phan Thị Anh Thư",
             phone: c.phone || def.phone || "",
           }));
+        
           setAddress({
             line: def.line || "",
             ward: def.ward || "",
@@ -61,41 +108,139 @@ export default function Checkout({ isLoggedIn }) {
         }
       }
     } catch { }
-  }, [isLoggedIn]);
-
+  },  [isLoggedIn, navigate, user]);
   const subtotal = useMemo(
     () => cart.reduce((s, i) => s + (i.priceVND || 0) * (i.qty || 1), 0),
     [cart]
   );
-
+const [voucher, setVoucher] = useState("");
+const [discount, setDiscount] = useState(0);
+const [voucherError, setVoucherError] = useState("");
   const shipFee = shipping === "express" ? 50000 : 30000;
-  const total = subtotal + (cart.length ? shipFee : 0);
+  const total = subtotal + (cart.length ? shipFee : 0) - discount;
+
+  // Voucher states
+
 
   const onChangeContact = (k, v) => setContact((c) => ({ ...c, [k]: v }));
 
-  const onChangeAddress = (k, v) => setAddress((a) => ({ ...a, [k]: v }));
+ // const onChangeAddress = (k, v) => setAddress((a) => ({ ...a, [k]: v }));
+const applyVoucher = async () => {
+  const code = voucher.trim().toUpperCase();
 
-  const placeOrder = () => {
-    if (!isLoggedIn) {
-      navigate("/login");
+  if (!code) {
+    setVoucherError("Vui lòng nhập mã.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:8080/coupons/apply", {
+
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, total: subtotal })
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      setDiscount(0);
+      setVoucherError(json.message);
       return;
     }
-    if (!cart.length) {
-      alert("Giỏ hàng trống.");
-      return;
-    }
-    if (!contact.fullName || !contact.phone || !address.line || !address.city) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc.");
+
+    // Áp dụng kết quả từ server
+    setDiscount(json.discount);
+    setVoucherError("");
+  } catch (err) {
+    setVoucherError("Lỗi kết nối server");
+  }
+};
+
+const placeOrder = async () => {
+ 
+
+  if (!isLoggedIn) {
+    navigate("/login");
+    return;
+  }
+  if (!cart.length) {
+    alert("Giỏ hàng trống.");
+    return;
+  }
+  if (!selectedAddress) {
+    alert("Vui lòng chọn địa chỉ nhận hàng.");
+    return;
+  }
+  if (!contact.fullName || !contact.phone) {
+    alert("Vui lòng điền đầy đủ thông tin liên hệ.");
+    return;
+  }
+
+  const code = "OD" + Date.now().toString().slice(-8);
+
+  const payload = {
+    code,
+    userId: user?._id || null,
+    userId: user?._id || null,
+ items: cart.map(item => ({
+  id: item.id,                // id sản phẩm
+  sku: item.sku,              // mã sản phẩm
+  name: item.name,            // tên sản phẩm
+  img: item.img,              // ảnh sản phẩm
+  priceVND: item.priceVND,    // giá
+  qty: item.qty,              // số lượng
+  size: item.size || null,
+  color: item.color || null,
+})),
+
+
+    contact,
+   address: {
+  line: selectedAddress?.line || "",
+  ward: selectedAddress?.ward || "",
+  district: selectedAddress?.district || "",
+  city: selectedAddress?.city || "",
+  phone: selectedAddress?.phone || "",
+  label: selectedAddress?.label || ""
+},
+
+    shippingMethod: shipping,
+    paymentMethod: payment,
+    subtotal,
+    shipFee,
+    total,
+    voucherCode: voucher || null,
+discount,
+  };
+ console.log("Selected Address:", selectedAddress);
+console.log("Payload gửi lên:", payload);
+  try {
+    const res = await fetch("http://localhost:8080/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      alert(json.message || "Tạo đơn hàng thất bại!");
       return;
     }
 
-    const code = "OD" + Date.now().toString().slice(-8);
-    setOrderDone({ code, total });
+    setOrderDone({ code, total, shippingAddress: selectedAddress });
 
-    // clear cart
     localStorage.setItem("cart", JSON.stringify([]));
     setCart([]);
-  };
+
+  } catch (error) {
+    alert("Lỗi server khi tạo đơn hàng!");
+    console.error(error);
+  }
+};
+
+
 
   if (orderDone) {
     return (
@@ -214,59 +359,109 @@ export default function Checkout({ isLoggedIn }) {
             </div>
 
             {/* Address */}
-            <div className="co-card">
-              <h3 className="co-title">Địa chỉ nhận hàng</h3>
-              <div className="co-form">
-                <div className="co-row">
-                  <label>Địa chỉ *</label>
-                  <input
-                    className="footer__input"
-                    value={address.line}
-                    onChange={(e) => onChangeAddress("line", e.target.value)}
-                    placeholder="Số nhà, đường..."
-                  />
-                </div>
-                <div className="co-grid-2">
-                  <div className="co-row">
-                    <label>Phường/Xã</label>
-                    <input
-                      className="footer__input"
-                      value={address.ward}
-                      onChange={(e) => onChangeAddress("ward", e.target.value)}
-                    />
-                  </div>
-                  <div className="co-row">
-                    <label>Quận/Huyện</label>
-                    <input
-                      className="footer__input"
-                      value={address.district}
-                      onChange={(e) =>
-                        onChangeAddress("district", e.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="co-row">
-                  <label>Tỉnh/Thành phố *</label>
-                  <input
-                    className="footer__input"
-                    value={address.city}
-                    onChange={(e) => onChangeAddress("city", e.target.value)}
-                  />
-                </div>
-                <div className="co-row">
-                  <label>Ghi chú</label>
-                  <textarea
-                    className="footer__input"
-                    rows={3}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Giao giờ hành chính, gọi trước khi giao…"
-                    style={{ resize: "vertical" }}
-                  />
-                </div>
-              </div>
-            </div>
+          <div className="co-card">
+  <h3 className="co-title">📍 Địa chỉ nhận hàng</h3>
+
+  {!addresses.length && (
+    <p style={{ color: "#666" }}>Bạn chưa có địa chỉ. Hãy thêm địa chỉ trong trang Hồ sơ.</p>
+  )}
+
+  <div style={{ display: "grid", gap: 12 }}>
+    {addresses.map((addr) => {
+      const active = selectedAddress?._id === addr._id;
+      return (
+        <div
+           key={addr._id || addr.id}
+          onClick={() => setSelectedAddress(addr)}
+          style={{
+            border: active ? "2px solid #2563eb" : "1px solid #e5e7eb",
+            borderRadius: 12,
+            padding: 12,
+            cursor: "pointer",
+            background: active ? "#eff6ff" : "#fff",
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>
+            {addr.label || "Địa chỉ"}
+            {addr.isDefault && (
+              <span style={{ color: "#2563eb", marginLeft: 8 }}>
+                (Mặc định)
+              </span>
+            )}
+          </div>
+
+          <div>{addr.line}</div>
+          <div>
+            {addr.ward}, {addr.district}, {addr.city}
+          </div>
+          <div>📞 {addr.phone}</div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+{/* Voucher */}
+<div className="co-card">
+  <h3 className="co-title">🎁 Mã giảm giá</h3>
+
+  <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+    <input
+      className="footer__input"
+      placeholder="Nhập mã giảm giá..."
+      value={voucher}
+   onChange={(e) => {
+  const v = e.target.value.toUpperCase();
+  setVoucher(v);
+
+  // Nếu người dùng xóa sạch mã
+  if (v.trim() === "") {
+    setDiscount(0);
+    setVoucherError("");
+  }
+}}
+
+
+      style={{ flex: 1 }}
+    />
+
+    <button
+      className="btn btn--primary"
+      onClick={applyVoucher}
+      style={{ whiteSpace: "nowrap" }}
+    >
+      Áp dụng
+    </button>
+  </div>
+
+  {/* Thêm nút xóa mã */}
+  {discount > 0 && (
+    <button
+      className="btn"
+      style={{ marginTop: 8, padding: "6px 12px" }}
+      onClick={() => {
+        setVoucher("");      // clear input
+        setDiscount(0);      // clear discount
+        setVoucherError(""); // clear error
+      }}
+    >
+      Xóa mã
+    </button>
+  )}
+
+  {discount > 0 && (
+    <p style={{ marginTop: 8, color: "green", fontWeight: 600 }}>
+      ✓ Mã hợp lệ! Bạn được giảm {currencyVND(discount)} VND
+    </p>
+  )}
+
+  {voucherError && (
+    <p style={{ marginTop: 8, color: "red" }}>
+      {voucherError}
+    </p>
+  )}
+</div>
+
+
 
             {/* Shipping & Payment */}
             <div className="co-card">

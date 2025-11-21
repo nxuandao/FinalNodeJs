@@ -67,6 +67,7 @@ function normalizeProduct(doc) {
 
   return {
     ...doc,
+     sku: doc.sku || "", 
     colors,
     sizes,
     image: maybeProxy(normalizeImageUrl(primary)),
@@ -79,8 +80,14 @@ function normalizeProduct(doc) {
 // Giữ nguyên listProducts
 const listProducts = async (req, res) => {
   try {
+    
     const { q, color, category, page = 1, limit = 12, sort = 'createdAt', order = 'desc' } = req.query;
     const filter = { isActive: true };
+   
+    if (req.query.q) {
+      const arr = req.query.productType.split(",");
+      filter.productType = { $in: arr };
+    }
     const ors = [];
     if (q && q.trim()) {
       const qEsc = escapeRegex(q.trim());
@@ -164,5 +171,41 @@ const addReview = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+const deleteReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { createdAt } = req.body;
+    const userId = req.user.id;
 
-module.exports = { listProducts, getProductById, addReview };
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const before = product.reviews.length;
+
+    product.reviews = product.reviews.filter(
+      rev =>
+        !(rev.userId == userId &&
+          new Date(rev.createdAt).getTime() === new Date(createdAt).getTime())
+    );
+
+    if (product.reviews.length === before) {
+      return res.json({ success: false, message: "Bạn không thể xoá review này" });
+    }
+
+    await product.save();
+
+    return res.json({
+      success: true,
+      message: "Review deleted",
+      data: { reviews: product.reviews },
+    });
+
+  } catch (err) {
+    console.error("deleteReview error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+module.exports = { listProducts, getProductById, addReview,deleteReview };

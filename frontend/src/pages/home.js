@@ -98,35 +98,39 @@ return raw.map((p) => {
     ? String(p.images[0] || "").trim()
     : "";
 
-let preferred =
+  let preferred =
     (p.image && String(p.image).trim()) || first || PLACEHOLDER_IMG;
-  if (preferred && !preferred.startsWith("/") && !preferred.startsWith("http")) {
-  preferred = "/" + preferred;
-}
 
-  // ✅ Nếu là đường dẫn cục bộ (local), thêm API_BASE vào trước
+  if (preferred && !preferred.startsWith("/") && !preferred.startsWith("http")) {
+    preferred = "/" + preferred;
+  }
+
   const clean = preferred.startsWith("http")
     ? normalizeUrl(preferred)
-    : normalizeUrl(
-        `${API_BASE}${preferred.startsWith("/") ? preferred : "/" + preferred}`
-      );
+    : normalizeUrl(`${API_BASE}${preferred.startsWith("/") ? preferred : "/" + preferred}`);
 
   return {
     id: p._id || p.id,
     name: p.name ?? "",
+    sku: p.sku || "",
+
     price: Number(p.price ?? 0),
+
     image: clean,
     images: Array.isArray(p.images)
       ? p.images.map((i) =>
           i.startsWith("http")
             ? normalizeUrl(i)
-            : normalizeUrl(
-                `${API_BASE}${i.startsWith("/") ? i : "/" + i}`
-              )
+            : normalizeUrl(`${API_BASE}${i.startsWith("/") ? i : "/" + i}`)
         )
       : [clean],
+
+    // 🎯 THÊM 2 DÒNG NÀY
+    colors: Array.isArray(p.colors) ? p.colors : [],
+    sizes: Array.isArray(p.sizes) ? p.sizes : [],
   };
 });
+
 
   };
 
@@ -157,39 +161,50 @@ const addToCart = (p, e) => {
     const confirmLogin = window.confirm(
       "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay không?"
     );
-    if (confirmLogin) {
-      navigate("/login");
-    }
-    return; // Dừng hàm nếu chưa đăng nhập
+    if (confirmLogin) navigate("/login");
+    return;
   }
 
   try {
-    // 🧩 Lấy giỏ hàng hiện tại từ localStorage
+    // 🧩 Lấy giỏ hàng hiện tại
     const raw = localStorage.getItem("cart");
     const cur = raw ? JSON.parse(raw) : [];
 
-    // 🛍️ Kiểm tra xem sản phẩm đã có trong giỏ chưa
-    const idx = cur.findIndex((i) => i.id === p.id);
+    // 🎯 LẤY MÀU ĐẦU TIÊN TRONG MONGO
+    const selectedColor = Array.isArray(p.colors) && p.colors.length > 0
+      ? p.colors[0]
+      : "Default";
+
+    // 🎯 LẤY SIZE ĐẦU TIÊN TRONG MONGO
+    const selectedSize = Array.isArray(p.sizes) && p.sizes.length > 0
+      ? p.sizes[0].size || p.sizes[0]
+      : "Free Size";
+
+    const idx = cur.findIndex(
+      (i) =>
+        i.id === p.id &&
+        i.color === selectedColor &&
+        i.size === selectedSize
+    );
+
     if (idx >= 0) {
-      cur[idx].qty = (cur[idx].qty || 1) + 1;
+      cur[idx].qty += 1;
     } else {
       cur.push({
         id: p.id,
         name: p.name,
         img: p.image,
+         sku: p.sku, 
         priceVND: Number(p.price) || 0,
-        color: "Black",
-        size: "Size 1",
+        color: selectedColor,
+        size: selectedSize,
         qty: 1,
       });
     }
 
-    // 💾 Lưu lại vào localStorage
     localStorage.setItem("cart", JSON.stringify(cur));
 
-    // ✅ Thông báo và điều hướng
     alert("Đã thêm sản phẩm vào giỏ hàng!");
-    navigate("/cart");
   } catch (err) {
     console.error(err);
     alert("Thêm sản phẩm thất bại, vui lòng thử lại!");
@@ -198,43 +213,58 @@ const addToCart = (p, e) => {
 
 
 
+
 const buyNow = (p, e) => {
   e.stopPropagation();
 
-  // 🔒 Kiểm tra đăng nhập
   const token = localStorage.getItem("token");
   if (!token) {
     const confirmLogin = window.confirm(
       "Bạn cần đăng nhập để mua hàng. Bạn có muốn đăng nhập ngay không?"
     );
-    if (confirmLogin) {
-      navigate("/login");
-    }
+    if (confirmLogin) navigate("/login");
     return;
   }
 
   try {
-    // 🧾 Tạo sản phẩm tạm thời để đưa sang checkout
+    // LẤY MÀU – SIZE ĐẦU TIÊN TRONG MONGO
+    const selectedColor =
+      Array.isArray(p.colors) && p.colors.length > 0
+        ? p.colors[0]
+        : "Default";
+
+    const selectedSize =
+      Array.isArray(p.sizes) && p.sizes.length > 0
+        ? p.sizes[0].size || p.sizes[0]
+        : "Free Size";
+
+    // Tạo sản phẩm tạm
     const item = {
       id: p.id,
       name: p.name,
+      sku: p.sku,
       img: p.image,
       priceVND: Number(p.price) || 0,
-      color: "Black",
-      size: "Size 1",
+      color: selectedColor,
+      size: selectedSize,
       qty: 1,
     };
 
-    // 💾 Lưu tạm sản phẩm này vào localStorage (giống như giỏ hàng chỉ có 1 sp)
+    const key = `${item.id}__${item.color}__${item.size}`;
+
+    // Lưu cart
     localStorage.setItem("cart", JSON.stringify([item]));
 
-    // ✅ Chuyển sang trang checkout
+    // ⭐⭐ KEY QUAN TRỌNG: chọn sản phẩm cho checkout
+    localStorage.setItem("cart_selected_keys", JSON.stringify([key]));
+
     navigate("/checkout");
   } catch (err) {
     console.error(err);
     alert("Mua hàng thất bại, vui lòng thử lại!");
   }
 };
+
 
   const goDetail = (p) =>
     navigate(`/product/${p.id}`, { state: { product: p } });

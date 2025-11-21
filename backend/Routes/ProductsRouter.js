@@ -1,7 +1,7 @@
 // Routes/ProductsRouter.js
 const router = require('express').Router();
 const { ensureAuthenticated } = require('../Middlewares/Auth.js');
-const { listProducts, getProductById, addReview } = require('../Controllers/ProductsController');
+const { listProducts, getProductById, addReview, deleteReview} = require('../Controllers/ProductsController');
 
 // ✅ Public: tìm kiếm sản phẩm – ai cũng truy cập được
 
@@ -18,6 +18,8 @@ router.get('/secure-demo', ensureAuthenticated, (req, res) => {
     }
   ]);
 });
+router.delete('/:id/reviews/delete', ensureAuthenticated, deleteReview);
+
 router.get('/', listProducts);
 router.get('/:id', getProductById);
 router.get('/secure', ensureAuthenticated, listProducts);

@@ -1454,3 +1454,90 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* =======================
+   CHECKOUT PAGE
+   ======================= */
+
+.checkout-page {
+  background: #fff;
+}
+
+.co-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 420px;
+  gap: 28px;
+}
+
+.co-card {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.co-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+.co-form {
+  display: grid;
+  gap: 14px;
+}
+
+.co-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.co-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.footer__input {
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+}
+
+.co-subtitle {
+  font-weight: 600;
+  margin: 10px 0 8px;
+}
+
+.co-radios {
+  display: grid;
+  gap: 12px;
+}
+
+.co-radio {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.co-radio.is-on {
+  border-color: #111;
+  background: #f8f8f8;
+}
+
+.co-card .btn--primary {
+  width: 100%;
+  margin-top: 14px;
+  border-radius: 10px;
+  height: 46px;
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .co-grid {
+    grid-template-columns: 1fr;
+  }
+}

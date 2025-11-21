@@ -23,10 +23,8 @@ const Sidebar = () => {
         return "/homeAdmin/customers";
       case "products":
         return "/homeAdmin/products";
-      case "addproduct":
-        return "/homeAdmin/add-product";
-      case "analytics":
-        return "/homeAdmin/analytics";
+      case "coupons":
+        return "/homeAdmin/coupons";
       default:
         return "/homeAdmin/dashboard";
     }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import Home from "./pages/home";
@@ -24,7 +25,8 @@ import MainDash from "./components/MainDash/MainDash";
 import Orders from "./components/Orders/Orders";
 import CustormersList from "./components/Customers/Custormers";
 import ProductsList from "./components/Product/Products";
-
+import CouponsPage from "./components/Coupons/Coupons";
+import OrderDetail from "./components/Orders/OrderDetail";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -47,6 +49,7 @@ function App() {
 
   return (
     <div className="App">
+      
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home isLoggedIn={isLoggedIn} />} />
@@ -67,15 +70,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route
-          path="/homeAdmin"
-          element={
-            <ProtectedRoute role="admin">
-              {" "}
-              <AdminPage />{" "}
-            </ProtectedRoute>
-          }
-        />
+        
 
        <Route
           path="/homeAdmin"
@@ -93,6 +88,9 @@ function App() {
           <Route path="product/:id" element={<ProductDetailAdmin />} />
           <Route path="add-product" element={<AddProduct />} />
           <Route path="edit-product/:id" element={<EditProductAdmin />} />
+          <Route path="coupons" element={<CouponsPage />} />
+          <Route path="orders/:orderId" element={<OrderDetail />} />
+
         </Route>
        
       </Routes>

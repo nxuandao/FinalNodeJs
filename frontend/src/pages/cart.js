@@ -29,6 +29,7 @@ export default function Cart({ isLoggedIn }) {
         ? parsed
             .map((i) => ({
               id: i.id,
+              sku: i.sku || "",
               name: i.name || "Sản phẩm",
               img: i.img || "",
               priceVND: Number(i.priceVND || 0),
@@ -127,18 +128,26 @@ export default function Cart({ isLoggedIn }) {
     setSelected(new Set());
   };
 
-  const checkout = () => {
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-    if (selected.size === 0) return;
-    localStorage.setItem(
-      "cart_selected_keys",
-      JSON.stringify(Array.from(selected))
-    );
-    navigate("/checkout");
-  };
+const checkout = () => {
+  if (!isLoggedIn) {
+    navigate("/login");
+    return;
+  }
+
+  if (selected.size === 0) {
+    alert("Bạn chưa chọn sản phẩm nào, vui lòng chọn sản phẩm để tiếp tục mua hàng.");
+    return;
+  }
+
+  localStorage.setItem(
+    "cart_selected_keys",
+    JSON.stringify(Array.from(selected))
+  );
+
+  navigate("/checkout");
+};
+
+
 
   return (
     <div className="cart-page">
@@ -247,18 +256,35 @@ export default function Cart({ isLoggedIn }) {
                       <div className="cartrow__price">
                         Giá: {fmtVND(it.priceVND)} VND
                       </div>
+                        <div className="cartrow__line">
+                          <span className="cartrow__label">Size:</span>
+                          <span className="cartrow__value">{it.size || "—"}</span>
+                        </div>
+                                            <div className="cartrow__line">
+                          <span className="cartrow__label">Màu sắc:</span>
 
-                      <div className="cartrow__line">
-                        <span className="cartrow__label">Size:</span>
-                        <span className="cartrow__value">{it.size || "—"}</span>
-                      </div>
+                          <span className="cartrow__value">
+                            {it.color || "—"}
+                          </span>
 
-                      <div className="cartrow__line">
-                        <span className="cartrow__label">Màu sắc:</span>
-                        <span className="cartrow__value">
-                          {it.color || "—"}
-                        </span>
-                      </div>
+                          {it.color && (
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: 18,
+                                height: 18,
+                                borderRadius: 4,
+                                border: "1px solid #ccc",
+                                marginLeft: 6,
+                                background: it.color,
+                              }}
+                            ></span>
+                          )}
+                        </div>
+
+
+
+                    
 
                       <div className="cartrow__line cartrow__qtyline">
                         <span className="cartrow__label">Số lượng:</span>
@@ -303,13 +329,21 @@ export default function Cart({ isLoggedIn }) {
             </div>
 
             <div className="cartpage__footer">
-              <div className="cartpage__total">
-                Đã chọn {selectedCount} sản phẩm — Tổng cộng:{" "}
-                <strong>{fmtVND(selectedTotalVND)} VND</strong>
-                <div style={{ color: "#6b7280", fontSize: 13 }}>
-                  Toàn bộ giỏ: {totalItems} sản phẩm — {fmtVND(totalVND)} VND
-                </div>
-              </div>
+<div className="cartpage__total">
+  {selectedCount === 0 ? (
+    <span>Chưa chọn sản phẩm nào</span>
+  ) : (
+    <>
+      Đã chọn {selectedCount} sản phẩm — Tổng cộng:{" "}
+      <strong>{fmtVND(selectedTotalVND)} VND</strong>
+    </>
+  )}
+
+  
+</div>
+
+
+
               <button
                 className="btn btn--primary"
                 onClick={checkout}

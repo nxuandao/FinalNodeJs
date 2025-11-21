@@ -7,6 +7,9 @@ const path = require("path");
 
 require("./Models/db"); // ✅ Kết nối MongoDB trước khi chạy routes
 
+
+
+
 // ✅ Import routes
 const AdminCustomerRoutes = require("./Routes/AdminCustomerRoutes");
 const AdminProductRoutes = require("./Routes/AdminProductRoutes");
@@ -14,10 +17,14 @@ const AuthRouter = require("./Routes/AuthRouter");
 const ProductsRouter = require("./Routes/ProductsRouter");
 const userRoutes = require("./Routes/UserRouter");
 const uploadRoutes = require("./Routes/UpLoadRouter"); // ✅ Upload route (Cloudinary)
-
+const orderRoutes = require("./Routes/orderRoutes");
 const app = express();
 const PORT = process.env.PORT || 8080;
-
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 /* --- ✅ 1. CORS phải bật TRƯỚC mọi routes --- */
 app.use(
   cors({
@@ -31,6 +38,8 @@ app.use(
     credentials: true,
   })
 );
+
+
 
 /* --- ✅ 2. Helmet bảo mật, cho phép ảnh Cloudinary / HTTPS / data URLs --- */
 app.use(
@@ -70,6 +79,7 @@ app.use(
 app.use(express.json());
 app.set("trust proxy", true);
 
+app.use("/orders", orderRoutes);
 /* --- ✅ 5. Healthcheck --- */
 app.get("/ping", (req, res) => res.send("Pong"));
 
@@ -99,6 +109,9 @@ app.get("/img-proxy", async (req, res) => {
     res.status(500).send("Proxy error");
   }
 });
+const couponsRouter = require("./Routes/CouponsRouter");
+app.use("/coupons", couponsRouter);
+
 
 /* --- ✅ 8. Start server --- */
 app.listen(PORT, () => {
