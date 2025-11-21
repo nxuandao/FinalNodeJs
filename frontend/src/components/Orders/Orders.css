@@ -15,20 +15,78 @@
   border-collapse: collapse;
   text-align: left;
 }
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: inline-block;
+  text-transform: capitalize;
+}
+
+.status-green {
+  background: #d4f8d4;
+  color: #1a8f1a;
+  border: 1px solid #1a8f1a;
+}
+
+.status-red {
+  background: #ffd6d6;
+  color: #d10000;
+  border: 1px solid #d10000;
+}
+
+.status-select {
+  padding: 5px;
+  border-radius: 5px;
+}
 
 .OrdersList th, .OrdersList td {
   padding: 12px 8px;
   border-bottom: 1px solid #eee;
 }
 
-.status.delivered {
-  color: #3bb077;
+
+/* Đang chuẩn bị hàng → xanh biển nhạt */
+.status-preparing {
+  background: #f0a2e1;
+  color: white;
+}
+
+/* Đang vận chuyển → xanh đậm */
+.status-shipping {
+  background: #94ccf3;
+  color: white;
+}
+
+/* Đã giao → xanh lá */
+.status-delivered {
+  background: #2ecc71;
+  color: white;
+}
+
+/* Đã hủy → đỏ */
+.status-cancelled {
+  background: #e74c3c;
+  color: white;
+}
+.status-wrapper {
+  padding: 4px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-wrapper select {
+  border: none;
+  background: transparent;
+  color: black !important;   /* chữ đen */
   font-weight: bold;
 }
-.status.pending {
-  color: #f1c40f;
-  font-weight: bold;
+
+/* Cho option cũng có màu */
+.status-select option {
+  color: #000;
 }
+
 .status.approved {
   color: #3498db;
   font-weight: bold;

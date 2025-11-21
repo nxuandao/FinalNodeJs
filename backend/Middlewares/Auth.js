@@ -1,26 +1,29 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+
 const ensureAuthenticated = (req, res, next) => {
-    const auth = req.headers['authorization'];
-    if (!auth) {
-        return res.status(403).json({ message: "Unauthorized, JWT token wrong or expired" });
-    }
-    try {
-        let token = auth;
-        if (typeof auth === 'string' && auth.toLowerCase().startsWith('bearer ')) {
-            token = auth.slice(7).trim();
-        }
-        const decoded = jwt.verify(auth, process.env.JWT_SECRET);
-        req.user = decoded;
+  const authHeader = req.headers["authorization"];
 
-        req.authToken = token;       // (tuỳ chọn) lưu lại token nếu cần dùng tiếp
-        return next();
-    } catch (err) {
-        return res.status(403).json({ message: "Unauthorized, JWT token wrong or expired" });
-    }
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Không có token",
+    });
+  }
 
+  const token = authHeader.split(" ")[1];
 
-}
-module.exports = {
-    ensureAuthenticated
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;   // lưu user vào request
+    next();
+  } catch (err) {
+    return res.status(403).json({
+      success: false,
+      message: "Token không hợp lệ hoặc hết hạn",
+    });
+  }
 };
 
+module.exports = {
+  ensureAuthenticated,
+};

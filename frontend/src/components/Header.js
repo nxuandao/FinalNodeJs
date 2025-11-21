@@ -7,31 +7,22 @@ import { useRef, useState, useEffect } from "react";
 
 const GROUPS = [
   {
-    title: "Nam",
-    key: "nam",
+    title: "Loại sản phẩm",
+    key: "type",
     items: [
-      { label: "Áo Sơmi", value: "nam-ao-somi" },
-      { label: "Áo Khoác", value: "nam-ao-khoac" },
-      { label: "Áo Thun", value: "nam-ao-thun" },
-      { label: "Quần Dài", value: "nam-quan-dai" },
-      { label: "Quần Short", value: "nam-quan-short" },
-    ],
-  },
-  {
-    title: "Nữ",
-    key: "nu",
-    items: [
-      { label: "Áo Sơmi", value: "nu-ao-somi" },
-      { label: "Áo Thun", value: "nu-ao-thun" },
-      { label: "Áo Khoác", value: "nu-ao-khoac" },
-      { label: "Quần Dài", value: "nu-quan-dai" },
-      { label: "Quần Short", value: "nu-quan-short" },
-      { label: "Váy", value: "nu-vay" },
-      { label: "Đầm", value: "nu-dam" },
-      { label: "Chân Váy", value: "nu-chan-vay" },
+      { label: "Áo Sơmi", value: "áo sơmi" },
+      { label: "Áo Thun", value: "áo thun" },
+      { label: "Áo Khoác", value: "áo khoác" },
+      { label: "Quần", value: "quần" },     // ⭐ GIỐNG Y DB
+      { label: "Quần Dài", value: "quần dài" }, 
+      { label: "Quần Short", value: "quần short" },
+      { label: "Váy", value: "váy" },
+      { label: "Đầm", value: "đầm" },
     ],
   },
 ];
+
+
 
 export default function Header({ isLoggedIn }) {
   const [search, setSearch] = useState("");
@@ -51,32 +42,28 @@ export default function Header({ isLoggedIn }) {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  useEffect(() => {
-    if (location.pathname !== "/store") return;
-    const cat = new URLSearchParams(location.search).get("cat");
-    if (!cat) {
-      setSelected("");
-      return;
-    }
-    const arr = cat.split(",");
-    if (arr.length === 1) {
-      setSelected(arr[0]);
-      return;
-    }
-    const namSet = new Set(GROUPS[0].items.map((i) => i.value));
-    const nuSet = new Set(GROUPS[1].items.map((i) => i.value));
-    const arrSet = new Set(arr);
-    if (arr.length === namSet.size && [...namSet].every((v) => arrSet.has(v))) {
-      setSelected("group:nam");
-    } else if (
-      arr.length === nuSet.size &&
-      [...nuSet].every((v) => arrSet.has(v))
-    ) {
-      setSelected("group:nu");
-    } else {
-      setSelected("");
-    }
-  }, [location.pathname, location.search]);
+useEffect(() => {
+  if (location.pathname !== "/store") return;
+
+  const type = new URLSearchParams(location.search).get("productType");
+
+  if (!type) {
+    setSelected("");
+    return;
+  }
+
+  const arr = type.split(",");
+
+  // nếu chỉ có 1 loại => chọn nó
+  if (arr.length === 1) {
+    setSelected(arr[0]);
+    return;
+  }
+
+  // nhiều loại => không highlight gì cả
+  setSelected("");
+}, [location.pathname, location.search]);
+
 
   const onSearchSubmit = (e) => {
     if (e.key === "Enter") {
@@ -87,7 +74,8 @@ export default function Header({ isLoggedIn }) {
 
   const goStore = (catValues) => {
     const qs = new URLSearchParams();
-    if (catValues.length) qs.set("cat", catValues.join(","));
+    if (catValues.length) qs.set("q", catValues.join(","));
+
     navigate(`/store${qs.toString() ? `?${qs.toString()}` : ""}`, {
       replace: location.pathname === "/store",
     });

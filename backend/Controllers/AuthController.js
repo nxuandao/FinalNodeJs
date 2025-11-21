@@ -114,7 +114,10 @@ const login = async (req, res) => {
 
     // 🧩 Tạo JWT
     const jwtToken = jwt.sign(
-      { id: existingUser._id, role: existingUser.role },
+      { id: existingUser._id, 
+        name: existingUser.name,      
+        email: existingUser.email,
+        role: existingUser.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );

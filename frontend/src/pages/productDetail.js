@@ -34,11 +34,25 @@ function StarRating({ value = 0, onChange, readOnly = false, size = 18 }) {
             cursor: readOnly ? "default" : "pointer",
           }}
         >
-          {n <= display ? "★" : "☆"}
+          <span style={{ color: n <= display ? "#f5c106" : "#ccc" }}>
+            {n <= display ? "★" : "☆"}
+          </span>
         </button>
       ))}
     </span>
   );
+}
+
+function getCurrentUser() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload; // { id, role, iat, exp }
+  } catch {
+    return null;
+  }
 }
 
 export default function ProductDetail({ isLoggedIn }) {
@@ -54,6 +68,8 @@ export default function ProductDetail({ isLoggedIn }) {
 
   // ⬇️ NEW: state review
   const [reviews, setReviews] = useState([]);
+  const currentUser = getCurrentUser();
+
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +110,7 @@ export default function ProductDetail({ isLoggedIn }) {
           sizes,
           desc: p.description || "",
           // ⬇️ NEW: đọc reviews nếu backend trả về
+          sizesData: Array.isArray(p.sizes) ? p.sizes : [],
           reviews: Array.isArray(p.reviews) ? p.reviews : [],
         };
         if (!cancelled) {
@@ -180,6 +197,7 @@ const addToCart = () => {
 
     const item = {
       id: product.id || product._id,
+      sku: product.sku,
       name: product.name || "Sản phẩm",
       img,
       priceVND,
@@ -293,6 +311,39 @@ const buyNow = () => {
       setSubmitting(false);
     }
   };
+const deleteReview = async (createdAt) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Bạn cần đăng nhập để xoá đánh giá!");
+    navigate("/login");
+    return;
+  }
+
+  if (!window.confirm("Bạn muốn xoá đánh giá này?")) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/products/${id}/reviews/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ createdAt }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setReviews(data.data.reviews);
+      alert("Xoá đánh giá thành công!");
+    } else {
+      alert(data.message || "Không xoá được đánh giá");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Lỗi kết nối server");
+  }
+};
 
   return (
     <div className="product-detail-page">
@@ -400,7 +451,26 @@ const buyNow = () => {
                           fontSize: 14,
                         }}
                       >
-                        <b>{rv.userName || "Người dùng"}</b>
+                       <b>
+  {currentUser?.id === rv.userId ? "Bạn" : rv.userName || "Người dùng"}
+</b>
+
+{currentUser?.id === rv.userId && (
+  <button
+    onClick={() => deleteReview(rv.createdAt)}
+    style={{
+      marginLeft: "auto",
+      color: "red",
+      background: "transparent",
+      border: "none",
+      cursor: "pointer",
+      fontSize: 12,
+    }}
+  >
+    Xóa
+  </button>
+)}
+
                         <span>•</span>
                         <StarRating value={rv.rating} readOnly size={14} />
                         {rv.createdAt && (
@@ -438,15 +508,22 @@ const buyNow = () => {
                 <div className="pd-row">
                   <div className="pd-label">Màu sắc</div>
                   <div className="pd-options">
-                    {product.colors.map((c) => (
-                      <button
-                        key={`c-${c}`}
-                        className={`pd-chip ${color === c ? "on" : ""}`}
-                        onClick={() => setColor(c)}
-                      >
-                        {c}
-                      </button>
-                    ))}
+                 {product.colors.map((c) => (
+                  <button
+                    key={`c-${c}`}
+                    onClick={() => setColor(c)}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      border: color === c ? "2px solid #000" : "1px solid #ccc",
+                      background: c.toLowerCase(), // Tự đổi thành màu
+                      cursor: "pointer",
+                      marginRight: 8,
+                    }}
+                  />
+                ))}
+
                   </div>
                 </div>
               )}

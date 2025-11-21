@@ -140,10 +140,20 @@ export default function Products({ isLoggedIn }) {
       return {
         id: p._id || p.id,
         name: p.name ?? "",
+        sku: p.sku || "",
         price: Number(p.price ?? 0),
         image: clean,
         images: Array.isArray(p.images) ? p.images.map(normalizeUrl) : [clean],
-        colors: Array.isArray(p.colors) ? p.colors : [],
+        colors: Array.isArray(p.colors)
+  ? p.colors.map((c) => {
+      // Nếu là mã HEX hợp lệ → giữ nguyên
+      if (/^#([0-9A-F]{3}){1,2}$/i.test(c)) return c;
+
+      // Nếu là tên màu → chuyển về dạng chuẩn Titlecase
+      return c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+    })
+  : [],
+
         sizes: Array.isArray(p.sizes) ? p.sizes : [],
       };
     });
@@ -207,6 +217,7 @@ export default function Products({ isLoggedIn }) {
     if (!pickProduct) return;
     const item = {
       id: pickProduct.id,
+      sku: pickProduct.sku,
       name: pickProduct.name,
       img: pickImg || pickProduct.image,
       priceVND: Number(pickProduct.price) || 0,
@@ -228,17 +239,40 @@ export default function Products({ isLoggedIn }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   };
 
-  const onConfirmPicker = () => {
-    if (pickerMode === "cart") {
-      addCurrentToCart();
-      setPickerOpen(false);
-      alert("Đã thêm vào giỏ hàng");
-    } else {
-      addCurrentToCart();
-      setPickerOpen(false);
-      navigate("/checkout");
-    }
+const onConfirmPicker = () => {
+  const item = {
+    id: pickProduct.id,
+    sku: pickProduct.sku,
+    name: pickProduct.name,
+    img: pickImg || pickProduct.image,
+    priceVND: Number(pickProduct.price) || 0,
+    color: pickColor,
+    size: pickSize,
+    qty: pickQty,
   };
+
+  if (pickerMode === "cart") {
+    addCurrentToCart();
+    setPickerOpen(false);
+    alert("Đã thêm vào giỏ hàng");
+  } else {
+    // ⭐ GIỐNG HOÀN TOÀN HOME.JSX
+    const key = `${item.id}__${item.color}__${item.size}`;
+
+    // Chỉ lưu đúng 1 sản phẩm để checkout
+    localStorage.setItem("cart", JSON.stringify([item]));
+
+    // Chỉ chọn đúng sản phẩm này
+    localStorage.setItem("cart_selected_keys", JSON.stringify([key]));
+
+    setPickerOpen(false);
+    navigate("/checkout");
+  }
+};
+
+const goDetail = (p) => {
+  navigate(`/product/${p.id}`, { state: { product: p } });
+};
 
   return (
     <div className="products">
@@ -311,7 +345,13 @@ export default function Products({ isLoggedIn }) {
             {!loading &&
               !error &&
               items.map((p) => (
-                <div key={p.id} className="card" style={{ cursor: "default" }}>
+               <div
+                  key={p.id}
+                  className="card"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => goDetail(p)}
+                >
+
                   <div className="card__media">
                     <SafeProductImage src={p.image} alt={p.name} />
                     <div className="card__actions">
@@ -530,24 +570,21 @@ export default function Products({ isLoggedIn }) {
                     <div style={{ width: 90, color: "#555" }}>Màu sắc:</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {ensureOptions(pickProduct).colors.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => setPickColor(c)}
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: 999,
-                            border:
-                              pickColor === c
-                                ? "2px solid #111"
-                                : "1px solid #e5e7eb",
-                            background: "#fff",
-                            cursor: "pointer",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {c}
-                        </button>
-                      ))}
+  <button
+    key={c}
+    onClick={() => setPickColor(c)}
+    style={{
+      width: 36,
+      height: 36,
+      borderRadius: "50%",
+      border: pickColor === c ? "2px solid #111" : "1px solid #ccc",
+      background: c,               // ❗ DÙ HEX hay tên màu đều hiển thị đúng
+      cursor: "pointer",
+    }}
+    title={c}                      // Hover sẽ hiện tên/mã màu
+  />
+))}
+
                     </div>
                   </div>
 

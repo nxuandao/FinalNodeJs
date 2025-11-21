@@ -36,13 +36,10 @@ export const SidebarData = [
     icon: UilPackage,
     heading: 'Products'
   },
-  {
-    icon: UilPlus,
-    heading: "AddProduct", // 👈 phải trùng chính xác với tên trong AdminPage.jsx
-  },
+ 
   {
     icon: UilChart,
-    heading: 'Analytics'
+    heading: 'Coupons'
   },
 ];
 

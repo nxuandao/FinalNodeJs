@@ -141,7 +141,7 @@ const EditProductAdmin = () => {
           ...prev,
           images: [...prev.images, ...data.images],
         }));
-        toast.success("✅ Ảnh đã tải lên Cloudinary!");
+        toast.success("Ảnh đã tải lên Cloudinary!");
       } else {
         toast.error(data.message || "Lỗi khi tải ảnh!");
       }
@@ -178,12 +178,12 @@ const handleSubmit = async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      toast.success("✅ Cập nhật sản phẩm thành công!");
-      // Cập nhật lại UI hiển thị danh sách màu
+      toast.success("Cập nhật sản phẩm thành công!");
+      
       setProduct((prev) => ({ ...prev, colors: variantColors }));
-      setTimeout(() => navigate(`/admin/product/${id}`), 1000);
+      setTimeout(() => navigate(`/homeAdmin/product/${id}`), 1500);
     } else {
-      toast.error(data.message || "❌ Không thể cập nhật sản phẩm!");
+      toast.error(data.message || "Không thể cập nhật sản phẩm!");
     }
   } catch (error) {
     console.error("Error updating product:", error);
@@ -196,7 +196,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="add-product-container">
-      <h2>✏️ Chỉnh sửa sản phẩm</h2>
+      <h2>Chỉnh sửa sản phẩm</h2>
 
       <form className="add-product-form" onSubmit={handleSubmit}>
         {/* Mã sản phẩm */}

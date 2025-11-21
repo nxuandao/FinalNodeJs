@@ -1,0 +1,67 @@
+/* ĐẨY GIAO DIỆN SANG PHẢI */
+.detail-wrapper {
+  margin-left: 40px;
+  padding: 10px 20px;
+}
+
+/* Thẻ card trắng */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0px 4px 18px rgba(0, 0, 0, 0.08);
+  margin-top: 20px;
+  width: 95%;
+}
+
+/* Grid cho info */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 20px;
+  margin-bottom: 20px;
+}
+
+/* Bảng sản phẩm đẹp hơn */
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.detail-table th {
+  background: #f7f7f7;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+.status {
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* Xanh lá */
+.status.green {
+  background: #d4f8d4;
+  color: #1a8f1a;
+  border: 1px solid #1a8f1a;
+}
+
+/* Đỏ */
+.status.red {
+  background: #ffe0e0;
+  color: #d10000;
+  border: 1px solid #d10000;
+}
+
+.detail-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+h3 {
+  margin-top: 25px;
+  color: #222;
+}
