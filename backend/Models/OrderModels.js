@@ -43,8 +43,8 @@ const OrderSchema = new mongoose.Schema(
     paymentMethod: String,
     status: {
   type: String,
-  enum: ["Chuẩn bị hàng", "Đang vận chuyển", "Đã giao", "Bị Hủy"],
-  default: "Chuẩn bị hàng"
+  enum: ["Chờ xác nhận", "Chuẩn bị hàng", "Đang vận chuyển", "Đã giao", "Đã hủy"],
+  default: "Chờ xác nhận"
 },
 
     subtotal: Number,

@@ -19,8 +19,8 @@ export default function Checkout({ isLoggedIn }) {
 }, []);
 
   const [cart, setCart] = useState([]);
-  const [shipping, setShipping] = useState("standard"); // standard | express
-  const [payment, setPayment] = useState("cod"); // cod | momo | vnpay
+  const [shipping, setShipping] = useState("Tiêu Chuẩn"); // standard | express
+  const [payment, setPayment] = useState("COD"); // cod | momo | vnpay
  
 const [addresses, setAddresses] = useState([]);
 const [selectedAddress, setSelectedAddress] = useState(null);
@@ -116,7 +116,7 @@ setCart(fullCart);
 const [voucher, setVoucher] = useState("");
 const [discount, setDiscount] = useState(0);
 const [voucherError, setVoucherError] = useState("");
-  const shipFee = shipping === "express" ? 50000 : 30000;
+  const shipFee = shipping === "Hỏa tốc" ? 50000 : 30000;
   const total = subtotal + (cart.length ? shipFee : 0) - discount;
 
   // Voucher states
@@ -212,6 +212,7 @@ const placeOrder = async () => {
     total,
     voucherCode: voucher || null,
 discount,
+ 
   };
  console.log("Selected Address:", selectedAddress);
 console.log("Payload gửi lên:", payload);
@@ -222,14 +223,29 @@ console.log("Payload gửi lên:", payload);
       body: JSON.stringify(payload),
     });
 
-    const json = await res.json();
+   const json = await res.json();
 
-    if (!json.success) {
-      alert(json.message || "Tạo đơn hàng thất bại!");
-      return;
-    }
+if (!json.success) {
+  alert(json.message || "Tạo đơn hàng thất bại!");
+  return;
+}
 
-    setOrderDone({ code, total, shippingAddress: selectedAddress });
+// Nếu thanh toán VNPAY → chuyển hướng sang QR
+if (payment === "VNPAY") {
+  if (json.payUrl) {
+    window.location.href = json.payUrl; // Redirect sang trang QR của VNPAY
+    return;
+  } else {
+    alert("Không nhận được URL thanh toán VNPAY");
+    return;
+  }
+}
+
+// Còn lại (COD, MoMo) → xử lý bình thường
+setOrderDone({ code, total, shippingAddress: selectedAddress });
+localStorage.setItem("cart", JSON.stringify([]));
+setCart([]);
+
 
     localStorage.setItem("cart", JSON.stringify([]));
     setCart([]);
@@ -402,7 +418,7 @@ console.log("Payload gửi lên:", payload);
 </div>
 {/* Voucher */}
 <div className="co-card">
-  <h3 className="co-title">🎁 Mã giảm giá</h3>
+  <h3 className="co-title">Mã giảm giá</h3>
 
   <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
     <input
@@ -471,28 +487,28 @@ console.log("Payload gửi lên:", payload);
                 <div className="co-subtitle">Phương thức giao hàng</div>
                 <div className="co-radios">
                   <label
-                    className={`co-radio ${shipping === "standard" ? "is-on" : ""
+                    className={`co-radio ${shipping === "Tiêu Chuẩn" ? "is-on" : ""
                       }`}
                   >
                     <input
                       type="radio"
                       name="ship"
-                      checked={shipping === "standard"}
+                      checked={shipping === "Tiêu Chuẩn"}
                       onChange={() => { }}
-                      onClick={() => setShipping("standard")}
+                      onClick={() => setShipping("Tiêu Chuẩn")}
                     />
                     <span>Tiêu chuẩn (2-4 ngày) — 30.000đ</span>
                   </label>
                   <label
-                    className={`co-radio ${shipping === "express" ? "is-on" : ""
+                    className={`co-radio ${shipping === "Hỏa tốc" ? "is-on" : ""
                       }`}
                   >
                     <input
                       type="radio"
                       name="ship"
-                      checked={shipping === "express"}
+                      checked={shipping === "Hỏa tốc"}
                       onChange={() => { }}
-                      onClick={() => setShipping("express")}
+                      onClick={() => setShipping("Hỏa tốc")}
                     />
                     <span>Hoả tốc (1-2 ngày) — 50.000đ</span>
                   </label>
@@ -508,9 +524,9 @@ console.log("Payload gửi lên:", payload);
                     <input
                       type="radio"
                       name="pay"
-                      checked={payment === "cod"}
+                      checked={payment === "COD"}
                       onChange={() => { }}
-                      onClick={() => setPayment("cod")}
+                      onClick={() => setPayment("COD")}
                     />
                     <span>Thanh toán khi nhận hàng (COD)</span>
                   </label>
@@ -527,14 +543,14 @@ console.log("Payload gửi lên:", payload);
                     <span>Ví MoMo</span>
                   </label>
                   <label
-                    className={`co-radio ${payment === "vnpay" ? "is-on" : ""}`}
+                    className={`co-radio ${payment === "VNPAY" ? "is-on" : ""}`}
                   >
                     <input
                       type="radio"
                       name="pay"
-                      checked={payment === "vnpay"}
+                      checked={payment === "VNPAY"}
                       onChange={() => { }}
-                      onClick={() => setPayment("vnpay")}
+                      onClick={() => setPayment("VNPAY")}
                     />
                     <span>VNPAY</span>
                   </label>

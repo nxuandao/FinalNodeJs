@@ -211,7 +211,7 @@ const ProductDetailAdmin = () => {
             className="btn-submit"
             onClick={() => navigate(`/homeAdmin/edit-product/${id}`)}
           >
-            ✏️ Chỉnh sửa
+            Chỉnh sửa
           </button>
 
           <button

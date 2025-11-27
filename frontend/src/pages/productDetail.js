@@ -10,7 +10,7 @@ const API_BASE =
     import.meta.env.VITE_API_BASE) ||
   "http://localhost:8080";
 
-// ⭐ Tối giản: Component chọn sao (không đổi layout tổng)
+//Tối giản: Component chọn sao (không đổi layout tổng)
 function StarRating({ value = 0, onChange, readOnly = false, size = 18 }) {
   const [hover, setHover] = useState(0);
   const display = hover || value;
@@ -91,13 +91,16 @@ export default function ProductDetail({ isLoggedIn }) {
         const colors = Array.isArray(p.colors)
           ? p.colors.map(c => String(c).trim()).filter(Boolean)
           : [];
-        const sizes = Array.isArray(p.sizes)
-          ? p.sizes.map(it => {
-            if (typeof it === "string") return it.trim();
-            if (it && typeof it.size === "string") return it.size.trim();
-            return "";
-          }).filter(Boolean)
-          : [];
+      const sizes = Array.isArray(p.sizes)
+  ? [...new Set(
+      p.sizes.map(it => {
+        if (typeof it === "string") return it.trim();
+        if (it && typeof it.size === "string") return it.size.trim();
+        return "";
+      }).filter(Boolean)
+    )]
+  : [];
+
 
         const priceVND =
           typeof p.price === "number" ? p.price : Number(p.price || 0);
@@ -258,7 +261,7 @@ const buyNow = () => {
 };
 
 
-  // ⬇️ NEW: submit review (đánh giá bằng sao)
+  // submit review (đánh giá bằng sao)
   const submitReview = async (e) => {
     e.preventDefault();
 
@@ -351,8 +354,8 @@ const deleteReview = async (createdAt) => {
 
       <div className="container">
         <nav className="pd-breadcrumb">
-          <a href="/home">Home</a> <span>/</span> <a href="/store">Store</a>{" "}
-          <span>/</span> <span>{product?.name || "Loading..."}</span>
+        
+         
         </nav>
 
         {loading || !product ? (
