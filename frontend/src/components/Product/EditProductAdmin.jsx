@@ -517,7 +517,7 @@ const handleSubmit = async (e) => {
 
         {/* Submit */}
         <button type="submit" className="btn-submit">
-          💾 Lưu thay đổi
+          Lưu thay đổi
         </button>
         <button
           type="button"

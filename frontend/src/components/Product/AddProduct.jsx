@@ -213,14 +213,29 @@ export default function AddProduct() {
         {/* Danh mục + Giá */}
         <div className="form-row">
           <div className="form-group">
-            <label>Danh mục</label>
-            <input
-              type="text"
-              name="producttype"
-              value={product.producttype}
-              onChange={handleChange}
-              placeholder="VD: Áo, Quần, Giày..."
-            />
+           <label>Danh mục</label>
+<select
+  name="producttype"
+  value={product.producttype}
+  onChange={handleChange}
+>
+  <option value="">-- Chọn danh mục --</option>
+  <option value="quần">Quần</option>
+  <option value="váy">Váy</option>
+  <option value="đầm">Đầm</option>
+  <option value="áo sơ mi">Áo sơ mi</option>
+  <option value="áo thun">Áo thun</option>
+  <option value="áo khoác">Áo khoác</option>
+  <option value="quần short">Quần short</option>
+  <option value="hoodie">Hoodie</option>
+  <option value="chân váy">Chân váy</option>
+  <option value="jumbo / jumpsuit">Jumpsuit</option>
+  <option value="áo len">Áo len</option>
+  <option value="sweater">Sweater</option>
+  <option value="sơ mi tay dài">Sơ mi tay dài</option>
+  <option value="sơ mi tay ngắn">Sơ mi tay ngắn</option>
+</select>
+
           </div>
 
           <div className="form-group">
@@ -266,7 +281,7 @@ export default function AddProduct() {
               style={{ padding: "6px 12px" }}
               onClick={addColor}
             >
-              + Thêm màu
+              Thêm màu
             </button>
           </div>
 
@@ -484,7 +499,7 @@ export default function AddProduct() {
 
 
         <button type="submit" className="btn-submit">
-          ✅ Thêm sản phẩm
+          Thêm sản phẩm
         </button>
       </form>
     </div>

@@ -18,6 +18,7 @@ const ProductsRouter = require("./Routes/ProductsRouter");
 const userRoutes = require("./Routes/UserRouter");
 const uploadRoutes = require("./Routes/UpLoadRouter"); // ✅ Upload route (Cloudinary)
 const orderRoutes = require("./Routes/orderRoutes");
+const PaymentRouter = require("./Routes/Payment");
 const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(cors({
@@ -78,6 +79,7 @@ app.use(
 /* --- ✅ 4. Middleware cơ bản --- */
 app.use(express.json());
 app.set("trust proxy", true);
+app.use("/payment",PaymentRouter);
 
 app.use("/orders", orderRoutes);
 /* --- ✅ 5. Healthcheck --- */

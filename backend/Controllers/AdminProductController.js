@@ -145,12 +145,13 @@ const updateProduct = async (req, res) => {
     if (colors) product.colors = colors;
 
     // 🖼️ Cập nhật mảng ảnh (gộp ảnh mới + giữ ảnh cũ)
-    if (Array.isArray(images) && images.length > 0) {
-      const merged = [...new Set([...(product.images || []), ...images])];
-      product.images = merged;
-      product.markModified("images"); // 👈 ép mongoose lưu lại
-      console.log("✅ Ảnh sau khi merge:", merged);
-    }
+   // 🖼️ Overwrite toàn bộ danh sách ảnh (xoá + thêm)
+if (Array.isArray(images)) {
+  product.images = images;   // Ảnh nào FE gửi → để lại
+  product.markModified("images");
+  console.log("Final images:", images);
+}
+
 
     await product.save();
 

@@ -38,7 +38,8 @@ const ProductsList = () => {
   // 🧩 Hàm bật/tắt trạng thái hoạt động của sản phẩm
 const handleStatusChange = async (productId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:8080/admin/products/${productId}`, {
+      const res = await fetch(`http://localhost:8080/admin/products/${productId}/status`, {
+
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: newStatus }),

@@ -75,7 +75,7 @@ function normalizeProduct(doc) {
   };
 }
 
-/** ========= Controller ========= **/
+
 
 // Giữ nguyên listProducts
 const listProducts = async (req, res) => {
@@ -84,10 +84,11 @@ const listProducts = async (req, res) => {
     const { q, color, category, page = 1, limit = 12, sort = 'createdAt', order = 'desc' } = req.query;
     const filter = { isActive: true };
    
-    if (req.query.q) {
-      const arr = req.query.productType.split(",");
-      filter.productType = { $in: arr };
-    }
+   if (req.query.productType) {
+  const arr = req.query.productType.split(",");
+  filter.productType = { $in: arr };
+}
+
     const ors = [];
     if (q && q.trim()) {
       const qEsc = escapeRegex(q.trim());

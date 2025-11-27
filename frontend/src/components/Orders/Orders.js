@@ -45,7 +45,8 @@ const updateStatus = async (id, newStatus) => {
   }
 };
 const statusClass = {
-  "Đang chuẩn bị hàng": "status-preparing",
+   "Chờ xác nhận": "status-pending",
+  "Chuẩn bị hàng": "status-preparing",
   "Đang vận chuyển": "status-shipping",
   "Đã giao": "status-delivered",
   "Đã hủy": "status-cancelled",
@@ -91,7 +92,8 @@ const statusClass = {
       value={o.status}
       onChange={(e) => updateStatus(o._id, e.target.value)}
     >
-      <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
+      <option value="Chờ xác nhận">Chờ xác nhận</option>
+      <option value="Chuẩn bị hàng">Chuẩn bị hàng</option>
       <option value="Đang vận chuyển">Đang vận chuyển</option>
       <option value="Đã giao">Đã giao</option>
       <option value="Đã hủy">Đã hủy</option>

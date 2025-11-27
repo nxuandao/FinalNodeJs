@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState,useMemo} from "react";
 import Footer from "../components/Footer";
 import "../App.css";
+
+import Header from "../components/Header";
 
 const API_BASE =
   (typeof import.meta !== "undefined" &&
@@ -11,10 +13,10 @@ const API_BASE =
 const orderTabs = [
   { key: "all", label: "Tất cả" },
   { key: "new", label: "Chờ xác nhận" },
-  { key: "confirmed", label: "Chờ lấy hàng" },
-  { key: "shipped", label: "Chờ giao hàng" },
+  { key: "confirmed", label: "Chuẩn bị hàng" },
+  { key: "shipped", label: "Đang vận chuyển" },
   { key: "received", label: "Đã giao" },
-  { key: "return items", label: "Trả hàng" },
+
   { key: "cancelled", label: "Đã huỷ" },
 ];
 
@@ -56,11 +58,26 @@ export default function Profile() {
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
   const fileRef = useRef(null);
-
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [editingInfo, setEditingInfo] = useState(false);
+  const filteredOrders = useMemo(() => {
+  if (orderTab === "all") return orders;
+
+  const map = {
+    new: "Chờ xác nhận",
+    confirmed: "Chuẩn bị hàng",
+    shipped: "Đang vận chuyển",
+    received: "Đã giao",
+    "return items": "Trả hàng",
+    cancelled: "Đã hủy",
+  };
+
+  return orders.filter(o => o.status === map[orderTab]);
+}, [orders, orderTab]);
 
   // ====== ADDRESS STATE ======
   const [addresses, setAddresses] = useState([]);
@@ -120,6 +137,26 @@ const deleteAddress = async (id) => {
       console.error("Error loading user info:", err);
     }
   }, []);
+  useEffect(() => {
+  const fetchOrders = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!user._id) return;
+
+      const res = await fetch(`${API_BASE}/orders/user/${user._id}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setOrders(data.data);
+      }
+    } catch (err) {
+      console.error("❌ Lỗi tải orders:", err);
+    }
+  };
+
+  fetchOrders();
+}, [section]); // load mỗi khi chuyển tab
+
   // 🧩 Load user info từ MongoDB
 useEffect(() => {
   const fetchUserFromServer = async () => {
@@ -272,19 +309,25 @@ const saveAddress = async (e) => {
     let updatedList;
 
     if (editing === "new") {
-      // 👉 Thêm mới
       updatedList = [...addresses, newAddress];
     } else {
-      // 👉 Sửa
       updatedList = addresses.map((a) =>
         a.id === form.id ? newAddress : a
       );
     }
 
-    // 🧠 Gửi toàn bộ mảng đầy đủ lên backend
+    // ⭐ QUAN TRỌNG: Nếu đặt mặc định → bỏ mặc định của địa chỉ khác
+    if (newAddress.isDefault) {
+      updatedList = updatedList.map(a => ({
+        ...a,
+        isDefault: a.id === newAddress.id
+      }));
+    }
+
+    // 🧠 Gửi lên backend
     await updateUserInfo({ addresses: updatedList });
 
-    // 🧠 Lưu vào localStorage
+    // 🧠 Lưu localStorage
     localStorage.setItem(
       "user",
       JSON.stringify({
@@ -304,10 +347,32 @@ const saveAddress = async (e) => {
 
 
 
+const setDefaultAddress = async (id) => {
+  try {
+    let updatedList = addresses.map((a) => ({
+      ...a,
+      isDefault: a.id === id,
+    }));
 
-  const setDefaultAddress = (id) => {
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
-  };
+    // Lưu backend
+    await updateUserInfo({ addresses: updatedList });
+
+    // Lưu localStorage
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem("user") || "{}"),
+        addresses: updatedList,
+      })
+    );
+
+    setAddresses(updatedList);
+    alert("Đã đặt làm địa chỉ mặc định!");
+  } catch (err) {
+    alert("Không thể đặt mặc định!");
+  }
+};
+
 
   /* ============== ĐỔI MẬT KHẨU ============== */
 const changePassword = async (e) => {
@@ -352,14 +417,50 @@ const changePassword = async (e) => {
     });
     setEditingInfo(false);
   };
+  const handleCancelOrder = async (orderId) => {
+  await cancelOrder(orderId); // chờ hoàn tất
+  setSelectedOrder(null);     // đóng modal
+  setSection("orders");       // quay về tab chính
+  setOrderTab("all");         // nếu muốn hiển thị tất cả đơn
+};
+
+const cancelOrder = async (orderId) => {
+  if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này không?")) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/orders/update-status/${orderId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Đã hủy" }),
+    });
+
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || "Hủy đơn thất bại");
+
+    alert("Đơn hàng đã được hủy!");
+
+    // ✅ Cập nhật ngay trạng thái trong state, không cần fetch lại
+    setOrders(prev =>
+      prev.map(o => (o._id === orderId ? { ...o, status: "Đã hủy" } : o))
+    );
+
+    // Nếu đang mở modal, cập nhật luôn trạng thái
+    if (selectedOrder?._id === orderId) {
+      setSelectedOrder(prev => ({ ...prev, status: "Đã hủy" }));
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Không thể hủy đơn!");
+  }
+};
+
 
    return (
     <>
       <div className="container">
-        <nav className="pf-breadcrumb">
-          <a href="/home">Home</a> <span>/</span> <span>Profile Page</span>
-        </nav>
-        <div className="pf-wrap">
+         <Header isLoggedIn={true} />
+       
+       <div className="pf-wrap p-20" style={{ marginTop: "40px" }}>
           <aside className="pf-sidebar">
             <div
               style={{
@@ -432,11 +533,11 @@ const changePassword = async (e) => {
             </div>
 
             <ul className="pf-menu">
-              <li onClick={() => setSection("orders")}>🧾 Đơn hàng của tôi</li>
-              <li onClick={() => setSection("address")}>📍 Sổ địa chỉ</li>
-              <li onClick={() => setSection("info")}>ℹ️ Thông tin</li>
-              <li onClick={() => setSection("password")}>🔐 Đổi mật khẩu</li>
-              <li onClick={logout}>🚪 Đăng xuất</li>
+              <li onClick={() => setSection("orders")}>Đơn hàng của tôi</li>
+              <li onClick={() => setSection("address")}> Sổ địa chỉ</li>
+              <li onClick={() => setSection("info")}>Thông tin</li>
+              <li onClick={() => setSection("password")}>Đổi mật khẩu</li>
+              <li onClick={logout}>Đăng xuất</li>
             </ul>
           </aside>
 
@@ -454,15 +555,136 @@ const changePassword = async (e) => {
           >
             {t.label}
           </button>
+          
         ))}
+        {/* Nút hủy đơn, chỉ hiển thị nếu trạng thái là "Chờ xác nhận" */}
+   
       </div>
       <div className="pf-panel">
-        <EmptyOrders />
-      </div>
+
+{filteredOrders.map(order => (
+  <div
+    key={order._id}
+    style={{
+      border: "1px solid #e5e7eb",
+      borderRadius: 12,
+      padding: 16,
+      cursor: "pointer",
+    }}
+    onClick={() => setSelectedOrder(order)}
+  >
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <strong>Mã đơn: {order.code}</strong>
+      <span style={{ color: "#2563eb" }}>{order.status}</span>
+    </div>
+
+    <div style={{ marginTop: 8 }}>
+      {order.items.map((item, i) => (
+        <div key={i} style={{ display: "flex", gap: 10, marginBottom: 6 }}>
+          <img src={item.img} width={50} height={50} style={{ borderRadius: 8 }} />
+          <div>
+            <div>{item.name}</div>
+            <div>{item.qty} x {item.priceVND.toLocaleString()}đ</div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div style={{ marginTop: 10 }}>
+      <strong>Tổng tiền:</strong> {order.total.toLocaleString()}đ
+    </div>
+ 
+  </div>
+))}
+
+</div>
+
     </>
   )}
+{selectedOrder && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+    }}
+    onClick={() => setSelectedOrder(null)} // click ngoài modal để đóng
+  >
+    <div
+      onClick={(e) => e.stopPropagation()} // ngăn click bên trong đóng modal
+      style={{
+        background: "#fff",
+        padding: 20,
+        borderRadius: 12,
+        maxWidth: 600,
+        width: "90%",
+        maxHeight: "80vh",
+        overflowY: "auto",
+      }}
+    >
+      <button
+        onClick={() => setSelectedOrder(null)}
+        style={{ marginBottom: 12 }}
+      >
+        Quay lại
+      </button>
 
-  {/* ℹ️ Thông tin cá nhân */}
+      <h3>Đơn hàng: {selectedOrder.code}</h3>
+      <p>
+        Trạng thái: <strong>{selectedOrder.status}</strong>
+      </p>
+
+      <div style={{ marginTop: 12 }}>
+        {selectedOrder.items.map((item, i) => (
+          <div
+            key={i}
+            style={{ display: "flex", gap: 10, marginBottom: 6 }}
+          >
+            <img
+              src={item.img}
+              width={50}
+              height={50}
+              style={{ borderRadius: 8 }}
+            />
+            <div>
+              <div>{item.name}</div>
+              <div>
+                {item.qty} x {item.priceVND.toLocaleString()}đ
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p>
+        <strong>Tổng tiền:</strong> {selectedOrder.total.toLocaleString()}đ
+      </p>
+   {selectedOrder.status === "Chờ xác nhận" && (
+  <button
+    className="btn btn--danger"
+    style={{ marginTop: 10 }}
+    onClick={(e) => {
+      e.stopPropagation();
+     handleCancelOrder(selectedOrder._id);
+    }}
+  >
+    Hủy đơn
+  </button>
+)}
+
+
+    
+    </div>
+  </div>
+)}
+
+
+
+ 
  {section === "info" && (
   <div className="pf-panel" style={{ display: "block" }}>
     {!editingInfo ? (
@@ -581,7 +803,7 @@ const changePassword = async (e) => {
           });
         }}
       >
-        ➕ Thêm địa chỉ
+        Thêm địa chỉ
       </button>
     </div>
 
@@ -593,44 +815,59 @@ const changePassword = async (e) => {
    {/* Khi đã có địa chỉ */}
 {!editing && addresses.length > 0 && (
   <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
-    {addresses.map((addr, idx) => (
-      <div
-        key={idx}
-        style={{
-          position: "relative",
-          border: "1px solid #e5e7eb",
-          borderRadius: 12,
-          padding: 12,
-        }}
-      >
-        <div><strong>{addr.label || `Địa chỉ ${idx + 1}`}</strong></div>
-        <div>{addr.line}</div>
-        <div>
-          {addr.ward}, {addr.district}, {addr.city}
-        </div>
-        <div>📞 {addr.phone}</div>
-        {addr.isDefault && (
-          <div style={{ color: "#2563eb", marginTop: 4 }}>
-            (Địa chỉ mặc định)
-          </div>
-        )}
-         {/* 🧩 Nút sửa / xóa */}
-        <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 8 }}>
-          <button
-            className="btn btn--sm"
-            onClick={() => beginEditAddress(addr)}
-          >
-            ✏️ Sửa
-          </button>
-          <button
-            className="btn btn--sm btn--danger"
-            onClick={() => deleteAddress(addr.id)}
-          >
-            🗑️ Xoá
-          </button>
-        </div>
+  {addresses.map((addr, idx) => (
+  <div
+    key={addr.id}
+    style={{
+      position: "relative",
+      border: "1px solid #e5e7eb",
+      borderRadius: 12,
+      padding: 12,
+    }}
+  >
+    <div><strong>{addr.label || `Địa chỉ ${idx + 1}`}</strong></div>
+    <div>{addr.line}</div>
+    <div>{addr.ward}, {addr.district}, {addr.city}</div>
+    <div>📞 {addr.phone}</div>
+
+    {addr.isDefault && (
+      <div style={{ color: "#2563eb", marginTop: 4 }}>
+        (Địa chỉ mặc định)
       </div>
-    ))}
+    )}
+
+    {/* Nút hành động */}
+    <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 8 }}>
+      
+      {/* Nút Sửa */}
+      <button
+        className="btn btn--sm"
+        onClick={() => beginEditAddress(addr)}
+      >
+       Sửa
+      </button>
+
+      {/* Nút Đặt mặc định */}
+      {!addr.isDefault && (
+        <button
+          className="btn btn--sm"
+          onClick={() => setDefaultAddress(addr.id)}
+        >
+          Mặc định
+        </button>
+      )}
+
+      {/* Nút Xóa */}
+      <button
+        className="btn btn--sm btn--danger"
+        onClick={() => deleteAddress(addr.id)}
+      >
+        Xoá
+      </button>
+    </div>
+  </div>
+))}
+
   </div>
 )}
 
@@ -729,17 +966,18 @@ const changePassword = async (e) => {
         </label>
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button type="submit" className="btn btn--primary">
-            Lưu
-          </button>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => setEditing(null)}
-          >
-            Huỷ
-          </button>
-        </div>
+  <button type="submit" className="btn btn--primary">
+    Lưu
+  </button>
+  <button
+    type="button"
+    className="btn"
+    onClick={() => setEditingInfo(false)}
+  >
+    Huỷ
+  </button>
+</div>
+
       </form>
     )}
   </div>
