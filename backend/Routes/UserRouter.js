@@ -1,6 +1,7 @@
 const express = require("express");
 const UserModel = require("../Models/User");
 const { authenticateJWT } = require("../Middlewares/AuthValidation");
+const { getLoyaltyPoints } = require("../Controllers/AuthController");
 
 const router = express.Router();
 
@@ -81,6 +82,8 @@ router.post(
     }
   }
 );
+
+
 // ✅ Đổi mật khẩu
 router.put("/change-password", authenticateJWT, async (req, res) => {
   try {
@@ -132,5 +135,5 @@ router.get("/:id", authenticateJWT, async (req, res) => {
   }
 });
 
-
+router.get("/:id/loyalty", getLoyaltyPoints);
 module.exports = router;

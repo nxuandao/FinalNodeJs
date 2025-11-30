@@ -109,6 +109,22 @@ setCart(fullCart);
       }
     } catch { }
   },  [isLoggedIn, navigate, user]);
+  const [usePoints, setUsePoints] = useState(0);
+  const moneyFromPoints = usePoints * 1000; // 1 điểm = 1000 VND
+
+ 
+const [usePointsAvailable, setUsePointsAvailable] = useState(0);
+
+useEffect(() => {
+  if (!user?._id) return;
+
+  fetch(`http://localhost:8080/users/${user._id}/loyalty`)
+    .then(res => res.json())
+    .then(json => {
+      if (json.success) setUsePointsAvailable(json.points || 0);
+    });
+}, [user?._id]);
+
   const subtotal = useMemo(
     () => cart.reduce((s, i) => s + (i.priceVND || 0) * (i.qty || 1), 0),
     [cart]
@@ -117,7 +133,7 @@ const [voucher, setVoucher] = useState("");
 const [discount, setDiscount] = useState(0);
 const [voucherError, setVoucherError] = useState("");
   const shipFee = shipping === "Hỏa tốc" ? 50000 : 30000;
-  const total = subtotal + (cart.length ? shipFee : 0) - discount;
+  const total = subtotal + (cart.length ? shipFee : 0) - discount  - (usePoints * 1000);;
 
   // Voucher states
 
@@ -178,11 +194,13 @@ const placeOrder = async () => {
   }
 
   const code = "OD" + Date.now().toString().slice(-8);
+  const totalDiscount = discount + moneyFromPoints;
 
   const payload = {
     code,
     userId: user?._id || null,
     userId: user?._id || null,
+    useLoyaltyPoints: usePoints,
  items: cart.map(item => ({
   id: item.id,                // id sản phẩm
   sku: item.sku,              // mã sản phẩm
@@ -192,6 +210,8 @@ const placeOrder = async () => {
   qty: item.qty,              // số lượng
   size: item.size || null,
   color: item.color || null,
+  
+
 })),
 
 
@@ -229,6 +249,10 @@ if (!json.success) {
   alert(json.message || "Tạo đơn hàng thất bại!");
   return;
 }
+if (json.user) {
+  localStorage.setItem("user", JSON.stringify(json.user));
+}
+
 
 // Nếu thanh toán VNPAY → chuyển hướng sang QR
 if (payment === "VNPAY") {
@@ -314,6 +338,7 @@ setCart([]);
       </div>
     );
   }
+
 
   return (
     <div className="checkout-page">
@@ -477,6 +502,19 @@ setCart([]);
   )}
 </div>
 
+<div className="co-card">
+  <h3 className="co-title">Điểm thưởng</h3>
+
+  <p>Bạn đang có <strong>{usePointsAvailable}</strong> điểm</p>
+
+  <input
+    type="number"
+    className="footer__input"
+    value={usePoints}
+    onChange={(e) => setUsePoints(Number(e.target.value))}
+    placeholder="Nhập số điểm muốn dùng"
+  />
+</div>
 
 
             {/* Shipping & Payment */}
@@ -530,18 +568,7 @@ setCart([]);
                     />
                     <span>Thanh toán khi nhận hàng (COD)</span>
                   </label>
-                  <label
-                    className={`co-radio ${payment === "momo" ? "is-on" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="pay"
-                      checked={payment === "momo"}
-                      onChange={() => { }}
-                      onClick={() => setPayment("momo")}
-                    />
-                    <span>Ví MoMo</span>
-                  </label>
+                  
                   <label
                     className={`co-radio ${payment === "VNPAY" ? "is-on" : ""}`}
                   >
@@ -610,7 +637,23 @@ setCart([]);
                         <div style={{ fontSize: 13, color: "#6b7280" }}>
                           SL: {it.qty || 1}
                           {it.size ? ` • Size: ${it.size}` : ""}
-                          {it.color ? ` • Màu: ${it.color}` : ""}
+                          {it.color && (
+  <span style={{ marginLeft: 6, display: "inline-flex", alignItems: "center" }}>
+    • Màu:
+    <span
+      style={{
+        width: 14,
+        height: 14,
+        borderRadius: "50%",
+        display: "inline-block",
+        marginLeft: 6,
+        border: "1px solid #ddd",
+        background: it.color
+      }}
+    ></span>
+  </span>
+)}
+
                         </div>
                       </div>
                       <div style={{ fontWeight: 700 }}>
@@ -624,35 +667,45 @@ setCart([]);
                   style={{ borderTop: "1px solid #eee", margin: "10px 0" }}
                 />
 
-                <div style={{ display: "grid", gap: 8, fontSize: 14 }}>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <span>Tạm tính</span>
-                    <strong>{currencyVND(subtotal)} VND</strong>
-                  </div>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <span>Phí vận chuyển</span>
-                    <strong>
-                      {currencyVND(cart.length ? shipFee : 0)} VND
-                    </strong>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginTop: 6,
-                      fontSize: 16,
-                    }}
-                  >
-                    <span>Tổng cộng</span>
-                    <strong style={{ fontSize: 18 }}>
-                      {currencyVND(total)} VND
-                    </strong>
-                  </div>
-                </div>
+               <div style={{ display: "grid", gap: 8, fontSize: 14 }}>
+  <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <span>Tạm tính</span>
+    <strong>{currencyVND(subtotal)} VND</strong>
+  </div>
+
+  <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <span>Phí vận chuyển</span>
+    <strong>{currencyVND(cart.length ? shipFee : 0)} VND</strong>
+  </div>
+
+  {/* Giảm giá theo Mã giảm giá */}
+  {discount > 0 && (
+    <div style={{ display: "flex", justifyContent: "space-between", color: "#16a34a" }}>
+      <span>Giảm giá (Voucher)</span>
+      <strong>-{currencyVND(discount)} VND</strong>
+    </div>
+  )}
+
+  {/* Giảm giá từ Điểm thưởng */}
+  {usePoints > 0 && (
+    <div style={{ display: "flex", justifyContent: "space-between", color: "#16a34a" }}>
+      <span>Giảm từ điểm thưởng</span>
+      <strong>-{currencyVND(moneyFromPoints)} VND</strong>
+    </div>
+  )}
+
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 6,
+      fontSize: 16,
+    }}
+  >
+    <span>Tổng cộng</span>
+    <strong style={{ fontSize: 18 }}>{currencyVND(total)} VND</strong>
+  </div>
+</div>
 
                 <button
                   className="btn btn--primary"

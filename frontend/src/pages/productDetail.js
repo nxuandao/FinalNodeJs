@@ -227,8 +227,10 @@ const addToCart = () => {
     }
 
     localStorage.setItem("cart", JSON.stringify(list));
+    window.dispatchEvent(new Event("cart-updated"));
     handleSuccess?.("Đã thêm vào giỏ hàng");
-    navigate("/cart");
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  
   } catch (e) {
     console.error(e);
     handleError?.("Thêm vào giỏ thất bại, vui lòng thử lại");

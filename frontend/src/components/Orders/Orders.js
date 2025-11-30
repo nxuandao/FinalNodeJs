@@ -67,11 +67,12 @@ const statusClass = {
             <th>Total</th>
             <th>Date</th>
             <th>Status</th>
-            <th>Chi tiết</th> {/* ➕ Thêm cột này */}
+            <th>Chi tiết</th>
           </tr>
         </thead>
 
-        <tbody>
+
+       <tbody>
           {orders.map((o) => (
             <tr key={o._id}>
               <td>{o.code}</td>

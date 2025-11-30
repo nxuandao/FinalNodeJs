@@ -18,6 +18,14 @@
   width: 900px;
   max-width: 95%;
 }
+.btn-add-address {
+  margin-top: 16px; /* hoặc 20px nếu muốn xa hơn */
+}
+.btn-add-address {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
 
 /* Bên trái */
 .signup-left {

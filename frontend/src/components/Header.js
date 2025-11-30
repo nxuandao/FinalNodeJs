@@ -71,6 +71,18 @@ useEffect(() => {
       navigate(`/store?${qs}`);
     }
   };
+const [cartCount, setCartCount] = useState(
+  JSON.parse(localStorage.getItem("cart") || "[]").length
+);
+useEffect(() => {
+  const update = () => {
+    setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length);
+  };
+
+  window.addEventListener("cart-updated", update);
+  return () => window.removeEventListener("cart-updated", update);
+}, []);
+
 
   const goStore = (catValues) => {
     const qs = new URLSearchParams();
@@ -175,15 +187,37 @@ useEffect(() => {
           </div>
 
           {isLoggedIn && (
-            <button
-              className="icon-btn"
-              onClick={() => navigate("/cart")}
-              aria-label="Giỏ hàng"
-              title="Giỏ hàng"
-              type="button"
-            >
-              <ShoppingCartIcon />
-            </button>
+            <div style={{ position: "relative" }}>
+  <button
+    className="icon-btn"
+    onClick={() => navigate("/cart")}
+    aria-label="Giỏ hàng"
+    title="Giỏ hàng"
+    type="button"
+  >
+    <ShoppingCartIcon />
+  </button>
+
+  {cartCount > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: -4,
+        right: -4,
+        background: "red",
+        color: "white",
+        fontSize: 10,
+        padding: "2px 6px",
+        borderRadius: "50%",
+        fontWeight: "bold",
+        lineHeight: 1,
+      }}
+    >
+      {cartCount}
+    </span>
+  )}
+</div>
+
           )}
 
 {isLoggedIn ? (

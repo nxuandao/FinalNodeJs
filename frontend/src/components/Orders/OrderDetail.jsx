@@ -54,7 +54,33 @@ const OrderDetail = () => {
           <p><strong>Phương thức vận chuyển:</strong> {order.shippingMethod}</p>
           <p><strong>Tạm tính:</strong> {order.subtotal.toLocaleString("vi-VN")}₫</p>
           <p><strong>Phí vận chuyển:</strong> {order.shipFee.toLocaleString("vi-VN")}₫</p>
-          <p><strong>Giảm giá:</strong> -{order.discount.toLocaleString("vi-VN")}₫</p>
+          {/* Giảm giá voucher */}
+{/* Giảm giá Voucher */}
+{order.discount > 0 && (
+  <p>
+    <strong>Giảm giá (Voucher):</strong>{" "}
+    -{order.discount.toLocaleString("vi-VN")}₫
+  </p>
+)}
+
+{/* Giảm từ điểm thưởng */}
+{(order.loyaltyUsedValue > 0 || order.loyaltyUsed > 0) && (
+  <p>
+    <strong>Giảm từ điểm thưởng:</strong>{" "}
+    -{(
+        order.loyaltyUsedValue ||
+        (order.loyaltyUsed || 0) * 1000
+      ).toLocaleString("vi-VN")}₫
+  </p>
+)}
+
+{/* Tổng giảm */}
+<p>
+  <strong>Tổng giảm:</strong>{" "}
+  -{( (order.discount || 0) + (order.loyaltyUsed || 0) * 1000)
+      .toLocaleString("vi-VN")}₫
+</p>
+
           <p><strong>Tổng tiền:</strong> <span style={{ color: "red", fontWeight: "bold" }}>{order.total.toLocaleString("vi-VN")}₫</span></p>
         </div>
 

@@ -141,7 +141,8 @@ const login = async (req, res) => {
         avatar: existingUser.avatar || "",
         activity_log: existingUser.activity_log,
         createdAt: existingUser.createdAt,
-        updatedAt: existingUser.updatedAt
+        updatedAt: existingUser.updatedAt,
+         loyaltyPoints: existingUser.loyaltyPoints || 0
       }
     });
 
@@ -224,10 +225,33 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+const getLoyaltyPoints = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id)
+      .select("name loyaltyPoints");
+
+    if (!user)
+      return res.json({ success: false, message: "User không tồn tại!" });
+
+    res.json({
+      success: true,
+      points: user.loyaltyPoints,
+    });
+
+  } catch (err) {
+    console.error("❌ Loyalty error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server!",
+    });
+  }
+};
+
 
 module.exports = {
   signup,
   login,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getLoyaltyPoints
 };

@@ -164,7 +164,7 @@ const addToCart = (p, e) => {
     if (confirmLogin) navigate("/login");
     return;
   }
-
+  
   try {
     // 🧩 Lấy giỏ hàng hiện tại
     const raw = localStorage.getItem("cart");
@@ -201,9 +201,10 @@ const addToCart = (p, e) => {
         qty: 1,
       });
     }
-
+     
     localStorage.setItem("cart", JSON.stringify(cur));
 
+window.dispatchEvent(new Event("cart-updated"));
     alert("Đã thêm sản phẩm vào giỏ hàng!");
   } catch (err) {
     console.error(err);
