@@ -38,6 +38,8 @@ const OrderSchema = new mongoose.Schema(
     address: AddressSchema,
     voucherCode: { type: String, default: null },
     discount: { type: Number, default: 0 },
+    loyaltyUsed: { type: Number, default: 0 },     // Điểm user đã dùng
+loyaltyEarned: { type: Number, default: 0 },   // Điểm user nhận được
 
     shippingMethod: String,
     paymentMethod: String,

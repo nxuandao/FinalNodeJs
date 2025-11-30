@@ -254,6 +254,7 @@ const onConfirmPicker = () => {
   if (pickerMode === "cart") {
     addCurrentToCart();
     setPickerOpen(false);
+    window.dispatchEvent(new Event("cart-updated"));
     alert("Đã thêm vào giỏ hàng");
   } else {
     // ⭐ GIỐNG HOÀN TOÀN HOME.JSX
@@ -542,7 +543,8 @@ const goDetail = (p) => {
                   >
                     <div style={{ width: 90, color: "#555" }}>Kích thước:</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {ensureOptions(pickProduct).sizes.map((s) => (
+                      {[...new Set(ensureOptions(pickProduct).sizes)].map((s) => (
+
                         <button
                           key={s}
                           onClick={() => setPickSize(s)}

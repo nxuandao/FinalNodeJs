@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState,useMemo} from "react";
 import Footer from "../components/Footer";
-import "../App.css";
-
+import "./profile.css";
 import Header from "../components/Header";
 
 const API_BASE =
@@ -53,6 +52,7 @@ function EmptyOrders() {
 export default function Profile() {
   const [section, setSection] = useState("orders");
   const [orderTab, setOrderTab] = useState("all");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const [avatar, setAvatar] = useState("https://i.pravatar.cc/200?img=12");
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -83,7 +83,8 @@ export default function Profile() {
   const [addresses, setAddresses] = useState([]);
   const [editing, setEditing] = useState(null);
   const [addrForm, setAddrForm] = useState({
-    id: "",
+    id: crypto.randomUUID(),
+
     label: "",
     line: "",
     city: "",
@@ -112,10 +113,10 @@ const deleteAddress = async (id) => {
     }));
 
     setAddresses(updatedList);
-    alert("✅ Đã xoá địa chỉ!");
+    alert(" Đã xoá địa chỉ!");
   } catch (err) {
     console.error(err);
-    alert("❌ Không thể xoá địa chỉ!");
+    alert("Không thể xoá địa chỉ!");
   }
 };
 
@@ -125,7 +126,7 @@ const deleteAddress = async (id) => {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
 
-  // 🧩 Load user info từ localStorage
+  // oad user info từ localStorage
   useEffect(() => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -150,14 +151,14 @@ const deleteAddress = async (id) => {
         setOrders(data.data);
       }
     } catch (err) {
-      console.error("❌ Lỗi tải orders:", err);
+      console.error(" Lỗi tải orders:", err);
     }
   };
 
   fetchOrders();
 }, [section]); // load mỗi khi chuyển tab
 
-  // 🧩 Load user info từ MongoDB
+  //  Load user info từ MongoDB
 useEffect(() => {
   const fetchUserFromServer = async () => {
     try {
@@ -181,13 +182,22 @@ useEffect(() => {
     : `${API_BASE}${u.avatar}`
 );
 
-        setAddresses(u.addresses || []);
+     if (JSON.stringify(addresses) !== JSON.stringify(u.addresses)) {
+  setAddresses(u.addresses || []);
+}
+;
 
         // Cập nhật localStorage để đồng bộ
-        localStorage.setItem("user", JSON.stringify(u));
+       // ❗ Chỉ update localStorage nếu dữ liệu thật sự khác
+const oldUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+if (JSON.stringify(oldUser.addresses) !== JSON.stringify(u.addresses)) {
+    localStorage.setItem("user", JSON.stringify(u));
+}
+
       }
     } catch (err) {
-      console.error("❌ Lỗi khi tải thông tin user:", err);
+      console.error(" Lỗi khi tải thông tin user:", err);
     }
   };
 
@@ -195,7 +205,7 @@ useEffect(() => {
 }, []);
 
 
-  // 📤 Cập nhật thông tin user lên server
+  //  Cập nhật thông tin user lên server
   const updateUserInfo = async (patch) => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -214,7 +224,16 @@ useEffect(() => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const updated = await res.json();
 
-      localStorage.setItem("user", JSON.stringify(updated.user));
+     const old = JSON.parse(localStorage.getItem("user") || "{}");
+
+localStorage.setItem(
+  "user",
+  JSON.stringify({
+    ...old,
+    ...updated.user, // chỉ ghi đè field trả về
+  })
+);
+
       alert("Cập nhật thông tin thành công!");
     } catch (err) {
       console.error(err);
@@ -222,7 +241,7 @@ useEffect(() => {
     }
   };
 
-  // 📸 Upload avatar
+  //  Upload avatar
   const onAvatarChange = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -266,7 +285,7 @@ useEffect(() => {
     if (window.confirm("Bạn có chắc muốn đăng xuất không?")) {
       localStorage.clear();
       sessionStorage.clear?.();
-      window.location.href = "/login";
+      window.location.href = "/home";
     }
   };
 
@@ -285,10 +304,23 @@ useEffect(() => {
     });
   };
 
-  const beginEditAddress = (a) => {
-    setEditing(a.id);
-    setAddrForm({ ...a });
-  };
+const beginEditAddress = (a) => {
+  const realId = a.id || a._id;
+  setEditing(realId);
+  setAddrForm({
+    id: realId,
+    label: a.label,
+    line: a.line,
+    city: a.city,
+    district: a.district,
+    ward: a.ward,
+    phone: a.phone,
+    isDefault: a.isDefault,
+  });
+};
+
+
+
 
 const saveAddress = async (e) => {
   e.preventDefault();
@@ -311,12 +343,13 @@ const saveAddress = async (e) => {
     if (editing === "new") {
       updatedList = [...addresses, newAddress];
     } else {
-      updatedList = addresses.map((a) =>
-        a.id === form.id ? newAddress : a
-      );
+     updatedList = addresses.map((a) =>
+  (a.id || a._id) === form.id ? newAddress : a
+);
+
     }
 
-    // ⭐ QUAN TRỌNG: Nếu đặt mặc định → bỏ mặc định của địa chỉ khác
+    //  QUAN TRỌNG: Nếu đặt mặc định → bỏ mặc định của địa chỉ khác
     if (newAddress.isDefault) {
       updatedList = updatedList.map(a => ({
         ...a,
@@ -324,10 +357,10 @@ const saveAddress = async (e) => {
       }));
     }
 
-    // 🧠 Gửi lên backend
+    //  Gửi lên backend
     await updateUserInfo({ addresses: updatedList });
 
-    // 🧠 Lưu localStorage
+    //  Lưu localStorage
     localStorage.setItem(
       "user",
       JSON.stringify({
@@ -338,10 +371,10 @@ const saveAddress = async (e) => {
 
     setAddresses(updatedList);
     setEditing(null);
-    alert("✅ Cập nhật địa chỉ thành công!");
+    alert(" Cập nhật địa chỉ thành công!");
   } catch (err) {
     console.error(err);
-    alert("❌ Cập nhật địa chỉ thất bại!");
+    alert(" Cập nhật địa chỉ thất bại!");
   }
 };
 
@@ -439,7 +472,7 @@ const cancelOrder = async (orderId) => {
 
     alert("Đơn hàng đã được hủy!");
 
-    // ✅ Cập nhật ngay trạng thái trong state, không cần fetch lại
+    //  Cập nhật ngay trạng thái trong state, không cần fetch lại
     setOrders(prev =>
       prev.map(o => (o._id === orderId ? { ...o, status: "Đã hủy" } : o))
     );
@@ -531,7 +564,10 @@ const cancelOrder = async (orderId) => {
               />
               <h3 style={{ margin: 0 }}>{fullName}</h3>
             </div>
-
+              <div className="info-view-row">
+  <div className="info-label">Điểm thưởng</div>
+  <div className="info-value">{user.loyaltyPoints || 0} điểm</div>
+</div>
             <ul className="pf-menu">
               <li onClick={() => setSection("orders")}>Đơn hàng của tôi</li>
               <li onClick={() => setSection("address")}> Sổ địa chỉ</li>
@@ -540,10 +576,11 @@ const cancelOrder = async (orderId) => {
               <li onClick={logout}>Đăng xuất</li>
             </ul>
           </aside>
+              
 
           <section className="pf-content">
 
-  {/* 🧾 Đơn hàng */}
+  {/*  Đơn hàng */}
   {section === "orders" && (
     <>
       <div className="pf-tabs">
@@ -626,12 +663,7 @@ const cancelOrder = async (orderId) => {
         overflowY: "auto",
       }}
     >
-      <button
-        onClick={() => setSelectedOrder(null)}
-        style={{ marginBottom: 12 }}
-      >
-        Quay lại
-      </button>
+      
 
       <h3>Đơn hàng: {selectedOrder.code}</h3>
       <p>
@@ -685,31 +717,40 @@ const cancelOrder = async (orderId) => {
 
 
  
- {section === "info" && (
-  <div className="pf-panel" style={{ display: "block" }}>
+{section === "info" && (
+  <div className="pf-panel">
+
+    {/* --- CHẾ ĐỘ XEM THÔNG TIN --- */}
     {!editingInfo ? (
-      <div style={{ maxWidth: 520, display: "grid", gap: 10 }}>
+      <div className="info-card">
         <h3 style={{ marginTop: 0 }}>Thông tin của tôi</h3>
-        <div>
-          <strong>Họ và tên:</strong> {fullName || "Chưa cập nhật"}
+
+        <div className="info-view-row">
+          <div className="info-label">Họ và tên</div>
+          <div className="info-value">{fullName || "Chưa cập nhật"}</div>
         </div>
-        <div>
-          <strong>Email:</strong> {email || "Chưa cập nhật"}
+
+        <div className="info-view-row">
+          <div className="info-label">Email</div>
+          <div className="info-value">{email || "Chưa cập nhật"}</div>
         </div>
-        <div>
-          <strong>Số điện thoại:</strong> {phone || "Chưa cập nhật"}
+      
+        <div className="info-view-row">
+          <div className="info-label">Số điện thoại</div>
+          <div className="info-value">{phone || "Chưa cập nhật"}</div>
         </div>
-        <div style={{ marginTop: 8 }}>
-          <button
-            className="btn btn--primary"
-            onClick={() => setEditingInfo(true)}
-          >
+
+        <div>
+          <button className="btn btn--primary" onClick={() => setEditingInfo(true)}>
             Chỉnh sửa
           </button>
         </div>
       </div>
     ) : (
+
+      /* --- CHẾ ĐỘ CHỈNH SỬA --- */
       <form
+        className="info-edit-form"
         onSubmit={async (e) => {
           e.preventDefault();
           await updateUserInfo({
@@ -718,11 +759,10 @@ const cancelOrder = async (orderId) => {
           });
           setEditingInfo(false);
         }}
-        style={{ display: "grid", gap: 12, maxWidth: 520 }}
       >
         <h3 style={{ marginTop: 0 }}>Cập nhật thông tin</h3>
 
-        <div>
+        <div className="form-group">
           <label>Họ và tên</label>
           <input
             className="footer__input"
@@ -731,21 +771,17 @@ const cancelOrder = async (orderId) => {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>Email</label>
           <input
-            className="footer__input"
+            className="footer__input input-disabled"
             type="email"
             value={email}
             disabled
-            style={{
-              backgroundColor: "#f3f4f6",
-              cursor: "not-allowed",
-            }}
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>Số điện thoại</label>
           <input
             className="footer__input"
@@ -754,23 +790,23 @@ const cancelOrder = async (orderId) => {
           />
         </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
-  <button type="submit" className="btn btn--primary">
-    Lưu
-  </button>
-  <button
-    type="button"
-    className="btn"
-    onClick={() => setEditing(null)}
-  >
-    Huỷ
-  </button>
-</div>
-
+        <div className="info-btns">
+          <button type="submit" className="btn btn--primary">
+            Lưu
+          </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => setEditingInfo(false)}
+          >
+            Huỷ
+          </button>
+        </div>
       </form>
     )}
   </div>
 )}
+
 
  {/* 📍 Sổ địa chỉ */}
 {section === "address" && (
@@ -788,7 +824,7 @@ const cancelOrder = async (orderId) => {
       {/* Nút Thêm địa chỉ */}
      
         <button
-        className="btn btn--primary btn--sm"
+       className="btn btn--primary btn--sm btn-add-address"
         onClick={() => {
           setEditing("new");
           setAddrForm({
@@ -817,7 +853,9 @@ const cancelOrder = async (orderId) => {
   <div style={{ display: "grid", gap: 12, maxWidth: 560 }}>
   {addresses.map((addr, idx) => (
   <div
-    key={addr.id}
+   key={addr.id || addr._id}
+
+
     style={{
       position: "relative",
       border: "1px solid #e5e7eb",
@@ -840,30 +878,40 @@ const cancelOrder = async (orderId) => {
     <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 8 }}>
       
       {/* Nút Sửa */}
-      <button
-        className="btn btn--sm"
-        onClick={() => beginEditAddress(addr)}
-      >
-       Sửa
-      </button>
+     <button
+  className="btn btn--sm"
+  onClick={(e) => {
+    e.stopPropagation();
+    beginEditAddress(addr);
+  }}
+>
+  Sửa
+</button>
+
 
       {/* Nút Đặt mặc định */}
-      {!addr.isDefault && (
-        <button
-          className="btn btn--sm"
-          onClick={() => setDefaultAddress(addr.id)}
-        >
-          Mặc định
-        </button>
-      )}
+     <button
+  className="btn btn--sm"
+  onClick={(e) => {
+    e.stopPropagation();
+    setDefaultAddress(addr.id || addr._id);
+  }}
+>
+  Mặc định
+</button>
 
-      {/* Nút Xóa */}
-      <button
-        className="btn btn--sm btn--danger"
-        onClick={() => deleteAddress(addr.id)}
-      >
-        Xoá
-      </button>
+<button
+  className="btn btn--sm btn--danger"
+  onClick={(e) => {
+    e.stopPropagation();
+    deleteAddress(addr.id || addr._id);
+  }}
+>
+  Xoá
+</button>
+
+
+     
     </div>
   </div>
 ))}
@@ -972,7 +1020,8 @@ const cancelOrder = async (orderId) => {
   <button
     type="button"
     className="btn"
-    onClick={() => setEditingInfo(false)}
+    onClick={() => setEditing(null)}
+
   >
     Huỷ
   </button>
@@ -985,14 +1034,15 @@ const cancelOrder = async (orderId) => {
 
 
   {/* 🔐 Đổi mật khẩu */}
-  {section === "password" && (
-    <div className="pf-panel" style={{ display: "block" }}>
-      <h3>Thay đổi mật khẩu</h3>
-      <form
-        onSubmit={changePassword}
-        style={{ display: "grid", gap: 12, maxWidth: 520 }}
-      >
-        <div>
+ {section === "password" && (
+  <div className="pf-panel">
+
+    <div className="password-card">
+      <h3 style={{ marginTop: 0 }}>Thay đổi mật khẩu</h3>
+
+      <form onSubmit={changePassword} className="password-form">
+
+        <div className="pw-form-group">
           <label>Mật khẩu hiện tại</label>
           <input
             className="footer__input"
@@ -1001,7 +1051,8 @@ const cancelOrder = async (orderId) => {
             onChange={(e) => setCurPass(e.target.value)}
           />
         </div>
-        <div>
+
+        <div className="pw-form-group">
           <label>Mật khẩu mới</label>
           <input
             className="footer__input"
@@ -1010,7 +1061,8 @@ const cancelOrder = async (orderId) => {
             onChange={(e) => setNewPass(e.target.value)}
           />
         </div>
-        <div>
+
+        <div className="pw-form-group">
           <label>Nhập lại mật khẩu</label>
           <input
             className="footer__input"
@@ -1019,12 +1071,17 @@ const cancelOrder = async (orderId) => {
             onChange={(e) => setConfirmPass(e.target.value)}
           />
         </div>
-        <button className="btn btn--primary" type="submit">
+
+        <button className="btn btn--primary password-btn" type="submit">
           Đổi mật khẩu
         </button>
+
       </form>
     </div>
-  )}
+
+  </div>
+)}
+
 </section>
 
         </div>

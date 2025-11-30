@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
+import "./cart.css"
 function parseVND(val) {
   if (typeof val === "number" && Number.isFinite(val)) return Math.round(val);
   if (typeof val === "string") {
@@ -211,21 +211,26 @@ const checkout = () => {
           <>
             <div className="cartlist">
               <div className="cartlist__toolbar">
-                <label className="chk">
-                  <input
-                    type="checkbox"
-                    checked={allChecked}
-                    onChange={toggleAll}
-                  />
-                  <span>Chọn tất cả</span>
-                </label>
-                <button
-                  className="btn btn--ghost"
-                  onClick={removeSelected}
-                  disabled={selected.size === 0}
-                >
-                  Xoá đã chọn
-                </button>
+                  <div className="toolbar-left">
+    <label className="chk">
+      <input
+        type="checkbox"
+        checked={allChecked}
+        onChange={toggleAll}
+      />
+      <span>Chọn tất cả</span>
+    </label>
+  </div>
+
+  <div className="toolbar-right">
+    <button
+      className="btn btn--ghost"
+      onClick={removeSelected}
+      disabled={selected.size === 0}
+    >
+      Xoá đã chọn
+    </button>
+  </div>
               </div>
 
               {cart.map((it) => {
@@ -263,10 +268,7 @@ const checkout = () => {
                                             <div className="cartrow__line">
                           <span className="cartrow__label">Màu sắc:</span>
 
-                          <span className="cartrow__value">
-                            {it.color || "—"}
-                          </span>
-
+                         
                           {it.color && (
                             <span
                               style={{
@@ -329,21 +331,19 @@ const checkout = () => {
             </div>
 
             <div className="cartpage__footer">
-<div className="cartpage__total">
-  {selectedCount === 0 ? (
-    <span>Chưa chọn sản phẩm nào</span>
-  ) : (
-    <>
-      Đã chọn {selectedCount} sản phẩm — Tổng cộng:{" "}
-      <strong>{fmtVND(selectedTotalVND)} VND</strong>
-    </>
-  )}
+              <div className="cartpage__total">
+                {selectedCount === 0 ? (
+                  <span>Chưa chọn sản phẩm nào    </span>
+                ) : (
+                  <>
+                    Đã chọn {selectedCount} sản phẩm — Tổng cộng:{"      "}
+                    <strong>{fmtVND(selectedTotalVND)} VND</strong>
+                  </>
+                )}
 
-  
-</div>
-
-
-
+                
+              </div>
+             <div className="cartpage__checkout-row">
               <button
                 className="btn btn--primary"
                 onClick={checkout}
@@ -351,6 +351,7 @@ const checkout = () => {
               >
                 Thanh toán
               </button>
+            </div>
             </div>
           </>
         )}

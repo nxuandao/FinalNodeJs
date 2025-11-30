@@ -1536,6 +1536,12 @@ body {
   font-size: 15px;
 }
 
+.btn-add-address {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
 @media (max-width: 900px) {
   .co-grid {
     grid-template-columns: 1fr;
