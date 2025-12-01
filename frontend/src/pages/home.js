@@ -9,6 +9,7 @@ import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import ChatBot from "../components/ChatBot";
 
 const API_BASE =
   (typeof import.meta !== "undefined" &&
@@ -358,7 +359,7 @@ const buyNow = (p, e) => {
           </div>
         </div>
       </section>
-
+      <ChatBot/>
       <Footer />
     </div>
   );

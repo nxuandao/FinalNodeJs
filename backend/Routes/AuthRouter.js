@@ -69,10 +69,64 @@ router.get("/reset-password/:token", async (req, res) => {
 
 router.post("/reset-password/:token", resetPassword);
 
-/* ========== AUTH CORE ========== */
+/* AUTH CORE */
 router.post("/signup", signupValidation, signup);
 router.post("/login", loginValidation, login);
 router.post("/forgot-password", forgotPassword);
+
+
+
+// Lấy toàn bộ lịch sử đăng nhập (giới hạn 50 bản ghi — do backend đã slice)
+router.get("/login-history", authenticateJWT, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user.id).select("activity_log");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy người dùng"
+      });
+    }
+
+    return res.json({
+      success: true,
+      history: user.activity_log.reverse() // đảo ngược: mới → cũ
+    });
+  } catch (err) {
+    console.error(" Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server"
+    });
+  }
+});
+
+
+// Lấy chi tiết 1 lần đăng nhập
+router.get("/login-history/:logId", authenticateJWT, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user.id).select("activity_log");
+
+    if (!user)
+      return res.status(404).json({ success: false, message: "Không tìm thấy user" });
+
+    const log = user.activity_log.id(req.params.logId);
+
+    if (!log)
+      return res.status(404).json({ success: false, message: "Không tìm thấy log tương ứng" });
+
+    return res.json({
+      success: true,
+      detail: log
+    });
+  } catch (err) {
+    console.error(" Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server"
+    });
+  }
+});
 
 /* ========== ADMIN DEMO ========== */
 router.get(
@@ -84,11 +138,7 @@ router.get(
   }
 );
 
-/* ========================================================= */
-/* 🟢 THÊM PHẦN KIỂM TRA ĐÃ ĐĂNG NHẬP HAY CHƯA */
-/* ========================================================= */
 
-// ✅ Endpoint /auth/me → yêu cầu có token (401 nếu chưa login)
 router.get("/me", authenticateJWT, async (req, res) => {
   try {
     const payload = req.user; // do middleware authenticateJWT gán
@@ -121,7 +171,7 @@ router.get("/me", authenticateJWT, async (req, res) => {
   }
 });
 
-// ✅ Endpoint /auth/status → không 401, chỉ trả authenticated true/false
+
 router.get("/status", async (req, res) => {
   try {
     const authHeader = req.headers.authorization || "";

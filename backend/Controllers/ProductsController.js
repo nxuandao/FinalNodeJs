@@ -131,7 +131,7 @@ const listProducts = async (req, res) => {
 };
 
 
-// ✅ mới: lấy chi tiết
+
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -144,7 +144,7 @@ const getProductById = async (req, res) => {
   }
 };
 
-// ✅ mới: thêm review
+
 const addReview = async (req, res) => {
   try {
     const { id } = req.params;

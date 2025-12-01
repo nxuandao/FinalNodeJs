@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 // }, { _id: false }); 
 const addressSchema = new mongoose.Schema({
   label: { type: String, default: "" },
-  line: { type: String, default: "" },         // ✅ sửa street → line
+  line: { type: String, default: "" },         
   city: { type: String, default: "" },
   district: { type: String, default: "" },
   ward: { type: String, default: "" },

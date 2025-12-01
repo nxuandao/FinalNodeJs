@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { parseVND } from "./price.js";
+import "./productDetail.css";
 import { handleSuccess, handleError } from "../utils.js";
 const API_BASE =
   (typeof import.meta !== "undefined" &&

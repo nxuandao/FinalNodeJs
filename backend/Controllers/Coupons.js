@@ -1,8 +1,6 @@
 const Coupon = require("../Models/CouponsModel");
 
-// ======================
-// CREATE COUPON
-// ======================
+
 exports.createCoupon = async (req, res) => {
   try {
 const { code, discountType, discountValue, expireAt, maxUses } = req.body;
@@ -44,9 +42,7 @@ const { code, discountType, discountValue, expireAt, maxUses } = req.body;
   }
 };
 
-// ======================
-// GET ALL COUPONS
-// ======================
+
 exports.getAllCoupons = async (req, res) => {
   try {
     const coupons = await Coupon.find().sort({ createdAt: -1 });
@@ -62,12 +58,8 @@ exports.getAllCoupons = async (req, res) => {
   }
 };
 
-// ======================
-// APPLY COUPON
-// ======================
-// ======================
-// APPLY COUPON (FINAL)
-// ======================
+
+
 exports.applyCoupon = async (req, res) => {
   try {
     const { code, total } = req.body;
@@ -153,9 +145,7 @@ exports.applyCoupon = async (req, res) => {
 };
 
 
-// ======================
-// DELETE COUPON
-// ======================
+
 exports.deleteCoupon = async (req, res) => {
   try {
     const coupon = await Coupon.findOneAndDelete({

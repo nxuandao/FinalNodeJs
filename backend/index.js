@@ -5,64 +5,59 @@ const helmet = require("helmet");
 const cors = require("cors");
 const path = require("path");
 
-require("./Models/db"); // ✅ Kết nối MongoDB trước khi chạy routes
 
+// MongoDB
+require("./Models/db");
 
-
-
-// ✅ Import routes
+// Import routes (CommonJS)
+const aiRoutes = require("./Routes/ai.routes");
 const AdminCustomerRoutes = require("./Routes/AdminCustomerRoutes");
 const AdminProductRoutes = require("./Routes/AdminProductRoutes");
 const AuthRouter = require("./Routes/AuthRouter");
 const ProductsRouter = require("./Routes/ProductsRouter");
 const userRoutes = require("./Routes/UserRouter");
-const uploadRoutes = require("./Routes/UpLoadRouter"); // ✅ Upload route (Cloudinary)
+const uploadRoutes = require("./Routes/UpLoadRouter");
 const orderRoutes = require("./Routes/orderRoutes");
 const PaymentRouter = require("./Routes/Payment");
+const couponsRouter = require("./Routes/CouponsRouter");
+
 const app = express();
 const PORT = process.env.PORT || 8080;
-app.use(cors({
-  origin: "http://localhost:3000",
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
-/* --- ✅ 1. CORS phải bật TRƯỚC mọi routes --- */
+
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // CRA
-      "http://localhost:5173", // Vite
-      process.env.FRONTEND_URL, // Nếu deploy FE
-      process.env.FRONTEND_ORIGIN, // thêm fallback
+      "http://localhost:3000",
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+      process.env.FRONTEND_ORIGIN,
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-
-
-/* --- ✅ 2. Helmet bảo mật, cho phép ảnh Cloudinary / HTTPS / data URLs --- */
 app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
         "img-src": [
-  "'self'",
-  "data:",
-  "blob:",
-  "https:",
-  "http:",
-  "http://localhost:8080",
-  "http://localhost:3000",
-  "http://localhost:5173"
-],
-
+          "'self'",
+          "data:",
+          "blob:",
+          "https:",
+          "http:",
+          "http://localhost:8080",
+          "http://localhost:3000",
+          "http://localhost:5173",
+        ],
       },
     },
   })
 );
+
+// Cho phép truy cập ảnh upload
 app.use(
   "/uploads",
   (req, res, next) => {
@@ -73,49 +68,42 @@ app.use(
   express.static(path.join(__dirname, "uploads"))
 );
 
-
-
-
-/* --- ✅ 4. Middleware cơ bản --- */
 app.use(express.json());
 app.set("trust proxy", true);
-app.use("/payment",PaymentRouter);
 
+// Routes
+app.use("/payment", PaymentRouter);
 app.use("/orders", orderRoutes);
-/* --- ✅ 5. Healthcheck --- */
-app.get("/ping", (req, res) => res.send("Pong"));
-
-/* --- ✅ 6. Các routes --- */
 app.use("/auth", AuthRouter);
 app.use("/products", ProductsRouter);
 app.use("/users", userRoutes);
 app.use("/auth", AdminCustomerRoutes);
-
-// ⚠️ Đặt upload route TRƯỚC admin product route
 app.use("/admin", uploadRoutes);
 app.use("/admin", AdminProductRoutes);
+app.use("/ai", aiRoutes);
+app.use("/coupons", couponsRouter);
 
-/* --- ✅ 7. (Optional) Image proxy (cho ảnh Cloudinary/hotlink) --- */
+app.get("/ping", (req, res) => res.send("Pong"));
+
+// Proxy ảnh
 app.get("/img-proxy", async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) return res.status(400).send("Missing url");
+
     const r = await fetch(url);
     if (!r.ok) return res.status(r.status).send("Upstream error");
 
     res.set("Content-Type", r.headers.get("content-type") || "image/jpeg");
     res.set("Cache-Control", "public, max-age=86400");
+
     r.body.pipe(res);
-  } catch (e) {
-    console.error("img-proxy error:", e);
+  } catch (err) {
+    console.error("img-proxy error:", err);
     res.status(500).send("Proxy error");
   }
 });
-const couponsRouter = require("./Routes/CouponsRouter");
-app.use("/coupons", couponsRouter);
 
-
-/* --- ✅ 8. Start server --- */
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Server is running at http://localhost:${PORT}`)
+);

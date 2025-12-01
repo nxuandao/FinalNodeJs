@@ -361,3 +361,84 @@
   font-size: 0.85rem !important;
   border-radius: 6px;
 }
+/* ============================
+   📱 Responsive cho màn nhỏ
+============================ */
+@media (max-width: 1024px) {
+  .pf-wrap {
+    grid-template-columns: 250px 1fr !important;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pf-wrap {
+    display: block !important;
+  }
+
+  .pf-sidebar {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  .pf-menu li {
+    padding: 12px 0;
+    font-size: 16px;
+  }
+
+  .pf-content {
+    width: 100% !important;
+  }
+
+  .pf-panel {
+    width: 100% !important;
+    padding: 12px !important;
+  }
+}
+
+/* 🎫 Card login history */
+.login-card {
+  border: 1px solid #ddd;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: 0.2s;
+}
+
+.login-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+/* 👀 Khi mobile */
+@media (max-width: 600px) {
+  .login-card {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .pf-sidebar h3 {
+    font-size: 18px;
+  }
+
+  .pf-user__avatar {
+    width: 90px !important;
+    height: 90px !important;
+  }
+}
+/* Lịch sử đăng nhập tối giản */
+.login-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.login-item:last-child {
+  border-bottom: none;
+}
+
+.login-item strong {
+  display: inline-block;
+  width: 90px;
+  color: #333;
+}

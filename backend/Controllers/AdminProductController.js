@@ -107,8 +107,6 @@ const updateProductStatus = async (req, res) => {
   }
 };
 
-
-// ✅ Cập nhật thông tin sản phẩm (dành cho trang EditProduct)
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -134,7 +132,7 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // 🧩 Cập nhật thông tin cơ bản
+    // Cập nhật thông tin cơ bản
     if (name) product.name = name;
     if (brand) product.brand = brand;
     if (description) product.description = description;
@@ -144,8 +142,7 @@ const updateProduct = async (req, res) => {
     if (sizes) product.sizes = sizes;
     if (colors) product.colors = colors;
 
-    // 🖼️ Cập nhật mảng ảnh (gộp ảnh mới + giữ ảnh cũ)
-   // 🖼️ Overwrite toàn bộ danh sách ảnh (xoá + thêm)
+
 if (Array.isArray(images)) {
   product.images = images;   // Ảnh nào FE gửi → để lại
   product.markModified("images");
@@ -157,11 +154,11 @@ if (Array.isArray(images)) {
 
     res.status(200).json({
       success: true,
-      message: "✅ Cập nhật sản phẩm thành công!",
+      message: "Cập nhật sản phẩm thành công!",
       data: product,
     });
   } catch (error) {
-    console.error("❌ Lỗi khi cập nhật sản phẩm:", error);
+    console.error("Lỗi khi cập nhật sản phẩm:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi cập nhật sản phẩm",
