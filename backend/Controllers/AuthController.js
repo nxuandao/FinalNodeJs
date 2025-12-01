@@ -8,9 +8,7 @@ const {
   sendEmail
 } = require('../utils/email');
 
-/* ============================================================
-   🟢 SIGNUP
-============================================================ */
+
 const signup = async (req, res) => {
   try {
     const { name, email, phone, password, role, status } = req.body;
@@ -49,7 +47,7 @@ const signup = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Signup Error:", err);
+    console.error(" Signup Error:", err);
     res.status(500).json({
       message: "Internal Server Error",
       success: false
@@ -57,9 +55,7 @@ const signup = async (req, res) => {
   }
 };
 
-/* ============================================================
-   🟢 LOGIN
-============================================================ */
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -95,7 +91,6 @@ const login = async (req, res) => {
       });
     }
 
-    // 🧠 Ghi log đăng nhập
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.ip;
     const userAgent = req.get("User-Agent");
 
@@ -112,7 +107,6 @@ const login = async (req, res) => {
       }
     });
 
-    // 🧩 Tạo JWT
     const jwtToken = jwt.sign(
       { id: existingUser._id, 
         name: existingUser.name,      
@@ -122,16 +116,16 @@ const login = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // 🧾 Log backend
-    console.log("✅ Login response sending user:", existingUser._id.toString());
+   
+    console.log("Login response sending user:", existingUser._id.toString());
 
-    // 🟩 Trả về client
+  
     return res.status(200).json({
       message: "Login successful",
       success: true,
       jwtToken,
       user: {
-        _id: existingUser._id, // ✅ chỉ còn _id
+        _id: existingUser._id, 
         name: existingUser.name,
         email: existingUser.email,
         phone: existingUser.phone,
@@ -147,7 +141,7 @@ const login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Login Error:", err);
+    console.error("Login Error:", err);
     return res.status(500).json({
       message: "Internal Server Error",
       success: false
@@ -155,9 +149,7 @@ const login = async (req, res) => {
   }
 };
 
-/* ============================================================
-   🟢 FORGOT PASSWORD
-============================================================ */
+
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -189,14 +181,11 @@ const forgotPassword = async (req, res) => {
 
     return res.json({ success: true, message: 'Password reset link sent to email' });
   } catch (err) {
-    console.error("❌ forgotPassword error:", err);
+    console.error(" forgotPassword error:", err);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-/* ============================================================
-   🟢 RESET PASSWORD
-============================================================ */
 const resetPassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -217,11 +206,11 @@ const resetPassword = async (req, res) => {
     user.resetTokenExpiry = undefined;
     await user.save();
 
-    console.log("✅ Password reset for user:", user.email);
+    console.log(" Password reset for user:", user.email);
     res.json({ success: true, message: "Password has been reset" });
 
   } catch (error) {
-    console.error("❌ resetPassword error:", error);
+    console.error(" resetPassword error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

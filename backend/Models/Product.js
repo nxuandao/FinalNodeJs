@@ -45,4 +45,6 @@ ProductSchema.index({ price: 1 });
 ProductSchema.index({ gender: 1 });
 
 
-module.exports = mongoose.model('Product', ProductSchema, 'product');
+module.exports =
+  mongoose.models.Product || mongoose.model('Product', ProductSchema, 'product');
+

@@ -1,5 +1,7 @@
 const Order = require("../Models/OrderModels");
 const User = require("../Models/User");
+const { sendEmail } = require("../utils/email"); 
+
 
 const { buildVnpayUrl } = require("../utils/vnpay");
 
@@ -7,16 +9,16 @@ exports.createOrder = async (req, res) => {
   try {
     const data = req.body;
 
-    // ===== 1. LẤY USER =====
+  
     const user = await User.findById(data.userId);
     if (!user) {
       return res.json({ success: false, message: "User không tồn tại!" });
     }
 
-    // ===== 2. TÍNH PHÍ SHIP =====
+  
     let shipFee = data.shippingMethod === "Hỏa tốc" ? 50000 : 30000;
 
-    // ===== 3. XỬ LÝ ĐIỂM =====
+    
     const POINT_RATE = 1000;
     const userPoints = user.loyaltyPoints || 0;
 
@@ -27,11 +29,11 @@ exports.createOrder = async (req, res) => {
 
     const loyaltyUsedValue = pointsToUse * POINT_RATE;
 
-    // ===== 4. LẤY GIÁ TRỊ CLIENT GỬI LÊN =====
+   
     const subtotal = Number(data.subtotal || 0);
     const discount = Number(data.discount || 0);
 
-    // ===== 5. TÍNH TOTAL ĐÚNG CHUẨN =====
+   
     const totalAmount =
       subtotal + shipFee - discount - loyaltyUsedValue;
 
@@ -42,7 +44,6 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ===== 6. TẠO ĐƠN =====
     const order = await Order.create({
       ...data,
       shipFee,
@@ -53,12 +54,65 @@ exports.createOrder = async (req, res) => {
       total: totalAmount,
       status: "Chờ xác nhận"
     });
+  
+try {
+  const userEmail = user.email;
 
-    // ===== 7. TRỪ ĐIỂM USER =====
+  const itemsHtml = order.items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:6px 8px;border:1px solid #ccc;">${item.name}</td>
+          <td style="padding:6px 8px;border:1px solid #ccc;text-align:center;">${item.qty}</td>
+          <td style="padding:6px 8px;border:1px solid #ccc;">${item.priceVND.toLocaleString()}đ</td>
+          <td style="padding:6px 8px;border:1px solid #ccc;">${(item.priceVND * item.qty).toLocaleString()}đ</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  const html = `
+    <h2>🎉 Đặt hàng thành công!</h2>
+    <p>Xin chào <b>${user.name}</b>, cảm ơn bạn đã mua hàng tại <b>OurShop</b>.</p>
+    
+    <h3>Mã đơn hàng: <b>${order.code}</b></h3>
+
+    <table style="border-collapse:collapse;width:100%;margin-top:10px;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #ccc;padding:8px;">Sản phẩm</th>
+          <th style="border:1px solid #ccc;padding:8px;">SL</th>
+          <th style="border:1px solid #ccc;padding:8px;">Giá</th>
+          <th style="border:1px solid #ccc;padding:8px;">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:16px;">Tổng thanh toán: 
+      <span style="color:red;">${order.total.toLocaleString()}đ</span>
+    </h3>
+
+    <p>Chúng tôi sẽ liên hệ với bạn khi đơn hàng được giao cho đơn vị vận chuyển.</p>
+    <p>Cảm ơn bạn đã tin tưởng đặt hàng ❤️</p>
+  `;
+
+  await sendEmail(userEmail, "Xác nhận đơn hàng thành công", html);
+
+  console.log("📩 Email xác nhận đã gửi đến:", userEmail);
+
+} catch (emailErr) {
+  console.error("❌ Lỗi gửi email:", emailErr);
+}
+
+
+   
     user.loyaltyPoints = userPoints - pointsToUse;
     await user.save();
 
-    // ===== 8. THANH TOÁN VNPAY =====
+   
     if (data.paymentMethod === "VNPAY") {
       const payUrl = buildVnpayUrl(order._id.toString(), totalAmount);
 
@@ -69,8 +123,8 @@ exports.createOrder = async (req, res) => {
         user
       });
     }
-
-    // ===== 9. TRẢ VỀ CHO COD =====
+  
+  
     return res.json({
       success: true,
       data: order,

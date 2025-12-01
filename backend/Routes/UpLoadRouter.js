@@ -24,8 +24,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-// ✅ route này là /admin/upload
-// ✅ Routes/uploadRoutes.js
+
 router.post("/upload/multiple", upload.array("images", 10), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -35,7 +34,7 @@ router.post("/upload/multiple", upload.array("images", 10), async (req, res) => 
     const urls = req.files.map((f) => f.path);
     res.json({ success: true, images: urls });
   } catch (err) {
-    console.error("❌ Upload nhiều ảnh lỗi:", err);
+    console.error(" Upload nhiều ảnh lỗi:", err);
     res.status(500).json({ success: false, message: "Upload nhiều ảnh thất bại!" });
   }
 });

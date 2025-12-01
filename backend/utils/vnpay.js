@@ -23,15 +23,15 @@ exports.buildVnpayUrl = (orderId, amount) => {
     vnp_OrderInfo: `order_${orderId}`,
     vnp_OrderType: "other",
     vnp_Amount: amount * 100,
-    vnp_ReturnUrl: config.vnp_ReturnUrl,  // 🔥 KEY ĐÚNG CHUẨN
+    vnp_ReturnUrl: config.vnp_ReturnUrl, 
     vnp_IpAddr: "127.0.0.1",
     vnp_CreateDate: moment(date).format("YYYYMMDDHHmmss")
   };
 
-  // ⭐ Sort params theo alphabet
+  // Sort params theo alphabet
   vnp_Params = sortObject(vnp_Params);
 
-  // ⭐ Create sign data
+  // Create sign data
   const signData = qs.stringify(vnp_Params, { encode: false });
 
   const secureHash = crypto
@@ -41,10 +41,10 @@ exports.buildVnpayUrl = (orderId, amount) => {
 
   vnp_Params["vnp_SecureHash"] = secureHash;
 
-  // ⭐ Log để debug nếu cần
-  console.log("🔵 PARAMS SENT TO VNPAY:", vnp_Params);
-  console.log("🟢 SIGN DATA:", signData);
-  console.log("🔴 HASH SEND:", secureHash);
+  // Log để debug nếu cần
+  console.log(" PARAMS SENT TO VNPAY:", vnp_Params);
+  console.log(" SIGN DATA:", signData);
+  console.log(" HASH SEND:", secureHash);
 
   return (
     config.vnp_Url +

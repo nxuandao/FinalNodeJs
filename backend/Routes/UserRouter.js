@@ -5,7 +5,7 @@ const { getLoyaltyPoints } = require("../Controllers/AuthController");
 
 const router = express.Router();
 
-// ✅ Cập nhật thông tin người dùng
+
 router.put("/update/:id", authenticateJWT, async (req, res) => {
   try {
     const { id } = req.params;
@@ -32,7 +32,7 @@ router.put("/update/:id", authenticateJWT, async (req, res) => {
       user,
     });
   } catch (err) {
-    console.error("❌ Update user error:", err);
+    console.error(" Update user error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
@@ -41,11 +41,10 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// 📁 tạo folder uploads nếu chưa có
+
 const uploadDir = path.join(__dirname, "../uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// ⚙️ cấu hình multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -56,7 +55,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ API: upload avatar
+
 router.post(
   "/upload/avatar",
   authenticateJWT,
@@ -84,7 +83,7 @@ router.post(
 );
 
 
-// ✅ Đổi mật khẩu
+// Đổi mật khẩu
 router.put("/change-password", authenticateJWT, async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -115,11 +114,11 @@ router.put("/change-password", authenticateJWT, async (req, res) => {
 
     res.json({ success: true, message: "Đổi mật khẩu thành công" });
   } catch (err) {
-    console.error("❌ Change password error:", err);
+    console.error(" Change password error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-// ✅ Lấy thông tin user theo ID
+//  Lấy thông tin user theo ID
 router.get("/:id", authenticateJWT, async (req, res) => {
   try {
     const { id } = req.params;
@@ -130,7 +129,7 @@ router.get("/:id", authenticateJWT, async (req, res) => {
 
     res.json({ success: true, user });
   } catch (err) {
-    console.error("❌ Get user error:", err);
+    console.error(" Get user error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

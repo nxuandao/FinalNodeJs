@@ -35,13 +35,13 @@ router.get("/vnpay_return", async (req, res) => {
     .update(Buffer.from(signData, "utf-8"))
     .digest("hex");
 
-  console.log("🟡 AFTER REMOVE HASH:", vnp_Params);
-  console.log("🟢 SIGN DATA CHECK:", signData);
-  console.log("🔴 HASH CHECK:", signed);
-  console.log("⚫ HASH RECEIVED:", secureHash);
+  console.log("AFTER REMOVE HASH:", vnp_Params);
+  console.log("SIGN DATA CHECK:", signData);
+  console.log("HASH CHECK:", signed);
+  console.log("HASH RECEIVED:", secureHash);
 
   if (secureHash !== signed) {
-    console.log("❌ Sai chữ ký!");
+    console.log("Sai chữ ký!");
     return res.redirect("http://localhost:3000/payment-failed");
   }
 

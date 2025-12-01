@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "./AddProduct.css"; // Dùng lại CSS
+import "./AddProduct.css"; 
 
 const ProductDetailAdmin = () => {
   const { id } = useParams();
@@ -8,7 +8,7 @@ const ProductDetailAdmin = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🧩 Lấy dữ liệu sản phẩm từ backend theo ID
+ 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -36,10 +36,10 @@ const ProductDetailAdmin = () => {
 
   return (
     <div className="add-product-container">
-      <h2>📦 Chi tiết sản phẩm</h2>
+      <h2> Chi tiết sản phẩm</h2>
 
       <form className="add-product-form">
-        {/* Mã sản phẩm */}
+     
         <div className="form-group">
           <label>Mã sản phẩm</label>
           <input
@@ -96,7 +96,7 @@ const ProductDetailAdmin = () => {
           </div>
         </div>
 
-        {/* Màu sắc tổng */}
+        
         {product.colors?.length > 0 && (
           <div className="form-group">
             <label>Màu có sẵn</label>
@@ -119,7 +119,7 @@ const ProductDetailAdmin = () => {
           </div>
         )}
 
-        {/* Ảnh sản phẩm */}
+      
         <div className="form-group">
           <label>Ảnh sản phẩm</label>
           {product.images?.length > 0 ? (
@@ -161,7 +161,7 @@ const ProductDetailAdmin = () => {
           )}
         </div>
 
-        {/* Biến thể size / màu / tồn kho */}
+        
         <div className="variants-section">
           <h4>Size / Màu / Tồn kho</h4>
           {product.sizes?.length > 0 ? (
@@ -201,7 +201,7 @@ const ProductDetailAdmin = () => {
           )}
         </div>
 
-        {/* Nút hành động */}
+      
         <div
           className="form-row"
           style={{ marginTop: "20px", justifyContent: "space-between" }}

@@ -378,6 +378,27 @@ const saveAddress = async (e) => {
   }
 };
 
+const [loginHistory, setLoginHistory] = useState([]);
+
+useEffect(() => {
+  if (section !== "loginHistory") return;
+
+  const fetchHistory = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/auth/login-history`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (data.success) setLoginHistory(data.history);
+    } catch (err) {
+      console.error("❌ Lỗi tải lịch sử:", err);
+    }
+  };
+
+  fetchHistory();
+}, [section]);
 
 
 const setDefaultAddress = async (id) => {
@@ -572,6 +593,8 @@ const cancelOrder = async (orderId) => {
               <li onClick={() => setSection("orders")}>Đơn hàng của tôi</li>
               <li onClick={() => setSection("address")}> Sổ địa chỉ</li>
               <li onClick={() => setSection("info")}>Thông tin</li>
+              <li onClick={() => setSection("loginHistory")}>Lịch sử đăng nhập</li>
+
               <li onClick={() => setSection("password")}>Đổi mật khẩu</li>
               <li onClick={logout}>Đăng xuất</li>
             </ul>
@@ -1029,6 +1052,26 @@ const cancelOrder = async (orderId) => {
 
       </form>
     )}
+  </div>
+)}
+{section === "loginHistory" && (
+  <div className="pf-panel">
+    <h3>Lịch sử đăng nhập</h3>
+
+    {loginHistory.length === 0 && <p>Chưa có lịch sử đăng nhập.</p>}
+
+    <div style={{ display: "grid", gap: 12 }}>
+      {loginHistory.map(log => (
+       <div className="login-item" key={log._id}>
+
+          <div className="login-card" key={log._id}>
+          <div><strong>Thời gian:</strong> {new Date(log.time).toLocaleString()}</div>
+          <div><strong>IP:</strong> {log.ip}</div>
+          <div><strong>Thiết bị:</strong> {log.userAgent}</div>
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 )}
 
