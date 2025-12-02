@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 function currencyVND(n) {
   return new Intl.NumberFormat("vi-VN").format(Number(n || 0));
@@ -118,7 +119,7 @@ const [usePointsAvailable, setUsePointsAvailable] = useState(0);
 useEffect(() => {
   if (!user?._id) return;
 
-  fetch(`http://localhost:8080/users/${user._id}/loyalty`)
+  fetch(`${API_BASE}/users/${user._id}/loyalty`)
     .then(res => res.json())
     .then(json => {
       if (json.success) setUsePointsAvailable(json.points || 0);
@@ -150,7 +151,7 @@ const applyVoucher = async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:8080/coupons/apply", {
+    const res = await fetch(`${API_BASE}/coupons/apply`, {
 
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -237,7 +238,8 @@ discount,
  console.log("Selected Address:", selectedAddress);
 console.log("Payload gửi lên:", payload);
   try {
-    const res = await fetch("http://localhost:8080/orders", {
+    const res = await fetch(`${API_BASE}/orders`, {
+
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

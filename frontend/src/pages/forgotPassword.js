@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
-
+  const API_URL = process.env.REACT_APP_API_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:8080/auth/forgot-password', {
+      const res = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

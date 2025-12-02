@@ -3,11 +3,8 @@ import Footer from "../components/Footer";
 import "./profile.css";
 import Header from "../components/Header";
 
-const API_BASE =
-  (typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    import.meta.env.VITE_API_BASE) ||
-  "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 
 const orderTabs = [
   { key: "all", label: "Tất cả" },

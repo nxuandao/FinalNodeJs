@@ -8,11 +8,17 @@ const ProductsList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🧩 Fetch sản phẩm từ backend
+ const API_BASE =
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_BASE) ||
+  "http://localhost:8080";
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:8080/admin/products");
+       const res = await fetch(`${API_BASE}/admin/products`);
+
         const data = await res.json();
         if (res.ok) {
           setProducts(data.data || []);
@@ -35,10 +41,11 @@ const ProductsList = () => {
   const handleViewDetails = (productId) => {
     navigate(`/homeAdmin/product/${productId}`);
   };
-  // 🧩 Hàm bật/tắt trạng thái hoạt động của sản phẩm
+ 
 const handleStatusChange = async (productId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:8080/admin/products/${productId}/status`, {
+      const res = await fetch(`${API_BASE}/admin/products/${productId}/status`, {
+
 
         method: "PUT",
         headers: { "Content-Type": "application/json" },

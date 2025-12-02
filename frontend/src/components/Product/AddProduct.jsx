@@ -32,14 +32,14 @@ export default function AddProduct() {
   };
 
   const getColorName = (hex) => colorNameMap[hex.toLowerCase()] || hex;
-
-  // 🧩 Xử lý input chung
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🧩 Quản lý biến thể (size / color / stock)
+ 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
     newVariants[index][field] = value;
@@ -66,7 +66,7 @@ export default function AddProduct() {
     setVariants(newVariants);
   };
 
-  // 🧩 Upload ảnh lên Cloudinary qua server
+
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -78,7 +78,8 @@ export default function AddProduct() {
 
     setUploading(true);
     try {
-      const res = await fetch("http://localhost:8080/admin/upload/multiple", {
+      const res = await fetch(`${API_BASE}/admin/upload/multiple`, {
+
         method: "POST",
         body: formData,
       });
@@ -90,19 +91,19 @@ export default function AddProduct() {
           ...prev,
           images: [...prev.images, ...data.images],
         }));
-        alert("✅ Ảnh đã tải lên Cloudinary!");
+        alert(" Ảnh đã tải lên Cloudinary!");
       } else {
-        alert(data.message || "❌ Lỗi khi tải ảnh!");
+        alert(data.message || " Lỗi khi tải ảnh!");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("❌ Không thể tải ảnh!");
+      alert(" Không thể tải ảnh!");
     } finally {
       setUploading(false);
     }
   };
 
-  // 🧩 Quản lý màu tổng (phía trên)
+ 
   const addColor = () => {
     if (!product.colors.includes(newColor)) {
       setProduct((prev) => ({
@@ -119,12 +120,12 @@ export default function AddProduct() {
     }));
   };
 
-  // 🧩 Submit form thêm sản phẩm
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!product.sku.trim()) {
-      alert("⚠️ Vui lòng nhập mã sản phẩm!");
+      alert(" Vui lòng nhập mã sản phẩm!");
       return;
     }
 
@@ -134,8 +135,10 @@ export default function AddProduct() {
       sizes: variants,
     };
 
+
     try {
-      const res = await fetch("http://localhost:8080/admin/products", {
+      const res = await fetch(`${API_BASE}/admin/products`, {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalProduct),
@@ -144,18 +147,18 @@ export default function AddProduct() {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`✅ Sản phẩm "${finalProduct.name}" đã được thêm thành công!`);
-        console.log("📦 Saved product:", data);
+        alert(` Sản phẩm "${finalProduct.name}" đã được thêm thành công!`);
+        console.log(" Saved product:", data);
       } else {
-        alert(`❌ Thêm sản phẩm thất bại: ${data.message}`);
+        alert(` Thêm sản phẩm thất bại: ${data.message}`);
       }
     } catch (err) {
       console.error("Error adding product:", err);
-      alert("❌ Lỗi khi kết nối đến server!");
+      alert(" Lỗi khi kết nối đến server!");
     }
   };
 
-  // 🧩 Giao diện
+
   return (
     <div className="add-product-container">
       <h2>🛒 Thêm sản phẩm mới</h2>
@@ -448,7 +451,7 @@ export default function AddProduct() {
     + Thêm biến thể
   </button>
 
-  {/* 🎨 Màu vừa chọn sẽ hiển thị luôn ở đây */}
+  
   {product.colors.length > 0 && (
     <div
       style={{
@@ -459,7 +462,7 @@ export default function AddProduct() {
         alignItems: "center",
       }}
     >
-      <h5 style={{ width: "100%" }}>🎨 Màu đã chọn:</h5>
+      <h5 style={{ width: "100%" }}> Màu đã chọn:</h5>
       {product.colors.map((color, index) => (
         <div
           key={index}

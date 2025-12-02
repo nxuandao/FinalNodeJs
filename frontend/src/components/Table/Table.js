@@ -7,6 +7,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import "./Table.css";
+const API_BASE =
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_BASE) ||
+  "http://localhost:8080";
 
 const makeStyle = (status) => {
   if (status === "Đã giao") {
@@ -32,7 +37,8 @@ export default function BasicTable() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/orders")
+   fetch(`${API_BASE}/orders`)
+
       .then((res) => res.json())
       .then((res) => {
         if (res.success) {

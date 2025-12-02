@@ -11,6 +11,7 @@ function Signup() {
         password: ''
         
     });
+    const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
     const navigate = useNavigate();
     const handleChange = (e) => {
@@ -29,7 +30,8 @@ function Signup() {
         }
 
         try{
-            const url = "http://localhost:8080/auth/signup";
+const url = `${API_BASE}/auth/signup`;
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {

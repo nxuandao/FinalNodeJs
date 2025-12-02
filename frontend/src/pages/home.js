@@ -11,11 +11,8 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import ChatBot from "../components/ChatBot";
 
-const API_BASE =
-  (typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    import.meta.env.VITE_API_BASE) ||
-  "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 
 const PLACEHOLDER_IMG = "https://via.placeholder.com/800x800?text=No+Image";
 
@@ -126,7 +123,7 @@ return raw.map((p) => {
         )
       : [clean],
 
-    // 🎯 THÊM 2 DÒNG NÀY
+    
     colors: Array.isArray(p.colors) ? p.colors : [],
     sizes: Array.isArray(p.sizes) ? p.sizes : [],
   };
@@ -156,7 +153,7 @@ return raw.map((p) => {
 const addToCart = (p, e) => {
   e.stopPropagation();
 
-  // 🔒 Kiểm tra đăng nhập
+  
   const token = localStorage.getItem("token");
   if (!token) {
     const confirmLogin = window.confirm(
@@ -167,16 +164,15 @@ const addToCart = (p, e) => {
   }
   
   try {
-    // 🧩 Lấy giỏ hàng hiện tại
+    
     const raw = localStorage.getItem("cart");
     const cur = raw ? JSON.parse(raw) : [];
 
-    // 🎯 LẤY MÀU ĐẦU TIÊN TRONG MONGO
     const selectedColor = Array.isArray(p.colors) && p.colors.length > 0
       ? p.colors[0]
       : "Default";
 
-    // 🎯 LẤY SIZE ĐẦU TIÊN TRONG MONGO
+    
     const selectedSize = Array.isArray(p.sizes) && p.sizes.length > 0
       ? p.sizes[0].size || p.sizes[0]
       : "Free Size";
@@ -257,7 +253,7 @@ const buyNow = (p, e) => {
     // Lưu cart
     localStorage.setItem("cart", JSON.stringify([item]));
 
-    // ⭐⭐ KEY QUAN TRỌNG: chọn sản phẩm cho checkout
+    //chọn sản phẩm cho checkout
     localStorage.setItem("cart_selected_keys", JSON.stringify([key]));
 
     navigate("/checkout");

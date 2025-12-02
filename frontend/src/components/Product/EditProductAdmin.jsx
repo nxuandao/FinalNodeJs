@@ -23,7 +23,7 @@ const EditProductAdmin = () => {
   const [newColor, setNewColor] = useState("#000000");
   const [loading, setLoading] = useState(true);
 
-  // 🎨 Bản đồ tên màu phổ biến
+  
   const colorNameMap = {
     "#000000": "Đen",
     "#ffffff": "Trắng",
@@ -35,14 +35,16 @@ const EditProductAdmin = () => {
     "#00ffff": "Xanh ngọc",
     "#808080": "Xám",
   };
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
   const getColorName = (hex) => colorNameMap[hex.toLowerCase()] || hex;
 
-  // 🧩 Lấy dữ liệu sản phẩm theo ID
+  
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/admin/products/${id}`);
+        const res = await fetch(`${API_BASE}/admin/products/${id}`);
+
         const data = await res.json();
 
         if (res.ok && data.data) {
@@ -72,13 +74,13 @@ const EditProductAdmin = () => {
     fetchProduct();
   }, [id]);
 
-  // 🧩 Input thay đổi chung
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🧩 Thêm màu vào danh sách tổng
+ 
   const addColor = () => {
     if (!product.colors.includes(newColor)) {
       setProduct((prev) => ({
@@ -95,7 +97,7 @@ const EditProductAdmin = () => {
     }));
   };
 
-  // 🧩 Biến thể (size / color / stock)
+ 
   const handleVariantChange = (index, field, value) => {
     const updated = [...variants];
     updated[index][field] = value;
@@ -118,7 +120,7 @@ const EditProductAdmin = () => {
     setVariants(updated);
   };
 
-  // 🧩 Upload ảnh
+ 
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -129,7 +131,8 @@ const EditProductAdmin = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/admin/upload/multiple", {
+      const res = await fetch(`${API_BASE}/admin/upload/multiple`, {
+
         method: "POST",
         body: formData,
       });
@@ -151,15 +154,16 @@ const EditProductAdmin = () => {
     }
   };
 
-  // 🧩 Submit cập nhật sản phẩm
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // ✅ Lấy tất cả màu từ variants (loại bỏ trùng)
+
   const variantColors = [...new Set(variants.map(v => v.color).filter(Boolean))];
 
   try {
-    const res = await fetch(`http://localhost:8080/admin/products/${id}`, {
+    const res = await fetch(`${API_BASE}/admin/products/${id}`, {
+
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -171,7 +175,7 @@ const handleSubmit = async (e) => {
         gender: product.gender,
         images: product.images,
         sizes: variants,
-        colors: variantColors, // ✅ chỉ cập nhật 1 lần khi lưu
+        colors: variantColors, 
       }),
     });
 
@@ -288,7 +292,7 @@ const handleSubmit = async (e) => {
           </select>
         </div>
 
-        {/* 🎨 Màu tổng */}
+    
         <div className="form-group">
           <label>Màu sắc</label>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -357,7 +361,7 @@ const handleSubmit = async (e) => {
           </div>
         </div>
 
-        {/* 📸 Ảnh */}
+      
         <div className="form-group">
           <label>Ảnh sản phẩm</label>
           <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
@@ -419,7 +423,7 @@ const handleSubmit = async (e) => {
           )}
         </div>
 
-        {/* 👕 Biến thể */}
+    
         <div className="variants-section">
           <h4>Size / Màu / Tồn kho</h4>
           {variants.map((v, index) => (
@@ -488,7 +492,7 @@ const handleSubmit = async (e) => {
             + Thêm biến thể
           </button>
 
-          {/* 🎨 Màu vừa chọn hiển thị ngay bên dưới */}
+          {/* Màu vừa chọn hiển thị ngay bên dưới */}
           {product.colors.length > 0 && (
             <div
               style={{
