@@ -5,11 +5,8 @@ import Footer from "../components/Footer";
 import { parseVND } from "./price.js";
 import "./productDetail.css";
 import { handleSuccess, handleError } from "../utils.js";
-const API_BASE =
-  (typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    import.meta.env.VITE_API_BASE) ||
-  "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 
 //Tối giản: Component chọn sao (không đổi layout tổng)
 function StarRating({ value = 0, onChange, readOnly = false, size = 18 }) {
@@ -67,7 +64,7 @@ export default function ProductDetail({ isLoggedIn }) {
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
 
-  // ⬇️ NEW: state review
+  
   const [reviews, setReviews] = useState([]);
   const currentUser = getCurrentUser();
 
@@ -401,13 +398,13 @@ const deleteReview = async (createdAt) => {
                 </div>
               )}
 
-              {/* ====== ĐÁNH GIÁ SẢN PHẨM: bên dưới mô tả ====== */}
+
               <div className="pd-reviews" style={{ marginTop: 16 }}>
                 <div className="pd-rev-title" style={{ fontWeight: 600, marginBottom: 8 }}>
                   Đánh giá sản phẩm
                 </div>
 
-                {/* Form đánh giá bằng sao */}
+              
                 <form onSubmit={submitReview} className="pd-rev-form" style={{ marginBottom: 12 }}>
                   <div style={{ marginBottom: 8 }}>
                     <div style={{ marginBottom: 4 }}>Chọn số sao:</div>
@@ -433,7 +430,7 @@ const deleteReview = async (createdAt) => {
                   </button>
                 </form>
 
-                {/* Danh sách đánh giá */}
+             
                 <div className="pd-rev-list">
                   {(!reviews || reviews.length === 0) && (
                     <div>Chưa có đánh giá.</div>
@@ -498,7 +495,7 @@ const deleteReview = async (createdAt) => {
                   ))}
                 </div>
               </div>
-              {/* =============================================== */}
+
             </div>
 
             <div className="pd-info">
@@ -507,8 +504,7 @@ const deleteReview = async (createdAt) => {
                 {new Intl.NumberFormat("vi-VN").format(product.priceVND)} VND
               </div>
 
-              {/* (ĐÃ chuyển mô tả sang cột trái sau ảnh) */}
-              {/* {product.desc && <p className="pd-desc">{product.desc}</p>} */}
+
 
               {!!product.colors?.length && (
                 <div className="pd-row">

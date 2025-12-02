@@ -12,7 +12,7 @@ const Sidebar = () => {
 
   const [expanded, setExpanded] = useState(true);
 
-  // 🧭 Map heading sang đường dẫn
+
   const getRouteForHeading = (heading) => {
     switch (heading.toLowerCase()) {
       case "dashboard":

@@ -6,11 +6,12 @@ const OrderDetail = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/orders/${orderId}`);
+        const res = await fetch(`${API_BASE}/orders/${orderId}`);
         const json = await res.json();
         if (json.success) setOrder(json.data);
       } catch (err) {

@@ -7,6 +7,7 @@ export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const navigate = useNavigate();
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,7 +15,7 @@ export default function ResetPassword() {
     if (password !== confirm) return toast.error('Passwords do not match');
 
     try {
-      const res = await fetch(`http://localhost:8080/auth/reset-password/${token}`, {
+      const res = await fetch(`${API_BASE}/auth/reset-password/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword: password })
